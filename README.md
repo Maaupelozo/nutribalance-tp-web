@@ -2,6 +2,8 @@
 
 MVP del **escenario 2: NutriTurnos**, adaptado al proyecto NutriBalance. Permite presentar el servicio, solicitar un turno, revisarlo desde el panel profesional y registrar una consulta en el historial del paciente.
 
+Versión publicada: https://nutribalance-mauricio.maauri.chatgpt.site (conserva acceso privado del propietario).
+
 **Solo datos ficticios.** Esta aplicación es una entrega académica, no un sistema clínico listo para uso real.
 
 ## Flujo principal
