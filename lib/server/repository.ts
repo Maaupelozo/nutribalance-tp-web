@@ -1,7 +1,7 @@
 import {env} from 'cloudflare:workers';
 import type {CoreSnapshot,Patient,Appointment,Visit,Block} from '@/lib/types';
 import {InputError,record,id,patientInput,appointmentInput,visitInput,blockInput,publicRequestInput} from '@/lib/validation';
-function database(){if(!env.DB)throw new InputError('La base de datos no está configurada.',503);return env.DB}
+function database(){if(!env.DB)throw new InputError('No pudimos acceder a la información. Intentá nuevamente más tarde.',503);return env.DB}
 const hhmm=(n:number)=>`${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;
 export async function readCore():Promise<CoreSnapshot>{const db=database();const res=await db.batch<Record<string,unknown>>([db.prepare('SELECT * FROM patients ORDER BY name COLLATE NOCASE'),db.prepare('SELECT * FROM appointments ORDER BY date,start_minutes'),db.prepare('SELECT * FROM consultations ORDER BY date,id'),db.prepare('SELECT * FROM schedule_blocks ORDER BY date,start_minutes'),db.prepare('SELECT revision FROM app_state WHERE id=1')]);
 const patients=res[0].results.map((r):Patient=>({id:Number(r.id),name:String(r.name),age:Number(r.age),dni:String(r.dni),email:String(r.email),phone:String(r.phone),goal:String(r.goal),os:String(r.insurance),active:!!r.active,allergies:String(r.allergies),notes:String(r.notes)}));

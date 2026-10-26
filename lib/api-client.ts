@@ -7,7 +7,7 @@ export class ApiError extends Error {
 async function result(response:Response):Promise<CoreSnapshot>{
   let body;
   try{body=await response.json() as CoreSnapshot & {error?:string}}catch{
-    const message=response.status===401?'Tu sesión venció. Volvé a ingresar para continuar.':'El servidor no respondió correctamente. Tus cambios no se confirmaron.';
+    const message=response.status===401?'Tu sesión venció. Volvé a ingresar para continuar.':'Los cambios no se confirmaron. Intentá nuevamente.';
     throw new ApiError(message,response.status);
   }
   if(!response.ok){

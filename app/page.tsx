@@ -5,7 +5,7 @@ import PublicFooter from '@/components/public/Footer';
 
 export const metadata:Metadata={
   title:'Mauricio Pelozo · NutriBalance | Atención nutricional',
-  description:'Conocé a Mauricio Pelozo y la propuesta de NutriBalance. Solicitá un turno para conversar sobre tus hábitos y organizar tu seguimiento. Demostración académica.',
+  description:'Conocé a Mauricio Pelozo y la propuesta de NutriBalance. Solicitá un turno para conversar sobre tus hábitos y organizar tu seguimiento.',
   alternates:{canonical:'/'},
   openGraph:{title:'Mauricio Pelozo · NutriBalance',description:'Una alimentación que encuentre lugar en tu vida.',url:'/'},
 };
@@ -48,7 +48,7 @@ export default function Home(){return <div className="public-page editorial-home
     </section>
     <section className="public-faq" aria-labelledby="faq-title">
       <div><h2 id="faq-title">Antes de<br/><em>encontrarnos.</em></h2><p>Lo que necesitás saber para solicitar tu turno.</p></div>
-      <div><details><summary>¿La solicitud confirma mi turno?</summary><p>No. El formulario registra una solicitud pendiente. Mauricio revisa la fecha y el horario antes de confirmar.</p></details><details><summary>¿Necesito una cuenta para solicitar?</summary><p>No. Podés completar el formulario sin iniciar sesión. El panel profesional tiene acceso restringido.</p></details><details><summary>¿Cómo se organiza el seguimiento?</summary><p>Los objetivos, las indicaciones y las consultas se conservan en la ficha del paciente. El portal del paciente es una demostración visual complementaria.</p></details><details><summary>¿Puedo cargar mis datos reales?</summary><p>No. Esta es una demostración académica. Usá solamente nombres, contactos y datos de prueba ficticios.</p></details></div>
+      <div><details><summary>¿La solicitud confirma mi turno?</summary><p>No. El formulario registra una solicitud pendiente. Mauricio revisa la fecha y el horario antes de confirmar.</p></details><details><summary>¿Necesito una cuenta para solicitar?</summary><p>No. Podés completar el formulario sin iniciar sesión. El panel profesional tiene acceso restringido.</p></details><details><summary>¿Cómo se organiza el seguimiento?</summary><p>Los objetivos y las indicaciones se retoman en cada encuentro para darle continuidad al seguimiento.</p></details><details><summary>¿Puedo cargar mis datos reales?</summary><p>Usá únicamente nombres, contactos y datos ficticios en este sitio.</p></details></div>
     </section>
     <section className="closing-section"><h2>Tu próximo paso<br/>puede empezar <em>acá.</em></h2><a className="btn" href="/solicitar-turno">Solicitar un turno <ArrowUpRight size={19}/></a></section>
   </main>
