@@ -58,6 +58,6 @@ En Windows, sustituí `python3` por la ruta del Python 3 instalado si ese comand
 
 ## Conservá una ruta de retorno
 
-La rama local es `tp/cierre-integracion`. La etiqueta local `respaldo-v4-2026-10-26` identifica la fuente recuperada antes de cambios. También se conserva un ZIP local ignorado en `.sites-runtime/respaldo-v4.zip`.
+La rama local es `tp/cierre-integracion`. La etiqueta local `respaldo-v4-2026-10-26` identifica la fuente recuperada antes de cambios y `respaldo-v7-antes-redisenio` conserva el punto anterior al rediseño. El respaldo ZIP temporal se retiró en la limpieza; el historial y las etiquetas permanecen en Git.
 
 Los cambios de cierre no agregan migraciones ni sustituyen D1. El hosting mantiene las versiones guardadas previas. Si necesitás regresar, seleccioná una versión anterior verificada en Sites y volvé a comprobar su flujo; no borres la base ni sobrescribas el historial Git.

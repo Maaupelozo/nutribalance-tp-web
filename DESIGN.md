@@ -141,7 +141,7 @@ NutriBalance pairs a personal, typographic identity with clear working surfaces.
 
 The public site uses generous space, large type and alternating open and filled sections. The professional workspace uses the same palette and controls with denser Manrope headings, tables and actions. Motion supports state changes and one restrained signature entrance; the system respects reduced-motion preferences.
 
-This is a source extraction from `app/styles/{tokens,foundation,fonts,public,workspace}.css`, shared public components and the stylesheet import order. It records implemented CSS, not browser measurements or newly captured screenshots. The public surface's composition contract remains in `.impeccable/surfaces/public.md`.
+This is a source extraction from `app/styles/{tokens,foundation,fonts,public,workspace}.css`, shared public components and the stylesheet import order. It records implemented CSS, not browser measurements or newly captured screenshots. The approved editorial direction is recorded in `docs/rediseno-editorial.md`; assistant-specific working files were removed during cleanup.
 
 **Key Characteristics:**
 
@@ -267,7 +267,7 @@ The forest signature panel carries “A tu ritmo,” fine pale divisions and Mau
 - **Do** keep Source Serif 4 for editorial expression and Manrope for operational headings, controls and data.
 - **Do** retain visible field labels, readable status labels, keyboard focus and reduced-motion support.
 - **Do** preserve the typographic identity of Mauricio Pelozo and the clear academic disclosure.
-- **Do** consult the public surface brief for page composition and the current stylesheets for exact responsive overrides.
+- **Do** consult `docs/rediseno-editorial.md` for page composition and the current stylesheets for exact responsive overrides.
 
 ### Don't:
 

@@ -132,6 +132,10 @@ Ver [análisis funcional](docs/analisis-funcional.md), [modelo de datos](docs/mo
 
 Pendientes del equipo: publicar este código en su repositorio GitHub, identificar los integrantes y sus contribuciones reales, adjuntar el enlace/capturas del prototipo y completar la medición Lighthouse/PageSpeed y la revisión final en un celular.
 
+## Limpieza del proyecto
+
+La limpieza del proyecto retiró 61 componentes de catálogo sin consumidores, auxiliares y ejemplos ajenos al flujo, SVG iniciales, vendor, scripts npm antiguos y metadatos temporales del asistente. Se quitaron 21 dependencias directas sin uso, incluidas las del catálogo y Tailwind; el CSS propio se procesa con Vite. Se conservan las rutas de demostración, el contexto de diseño en `DESIGN.md`/`PRODUCT.md`, la documentación del TP y las herramientas necesarias para Sites/D1.
+
 ## Uso de IA
 
 Se utilizó IA como apoyo para prototipado, generación de código, revisión y documentación. El equipo debe revisar lo incorporado y poder explicar los componentes, las validaciones, la autorización, el modelo relacional, las transacciones y el despliegue. No atribuir al equipo pruebas, entrevistas o decisiones que no haya realizado o validado.

@@ -86,3 +86,9 @@ El propietario autorizó el acceso público. Después del cambio se comprobó el
 El propietario aprobó aplicar la propuesta de identidad, tipografía, composición, formulario y panel. TypeScript, diez pruebas de dominio/cliente HTTP, el build y el Worker con D1 aislada aprobaron sobre el rediseño. La prueba del Worker comprueba también la identidad de Mauricio, las secciones públicas, los metadatos y los grupos semánticos del formulario.
 
 Una revisión independiente de código verificó la dirección y los vínculos de consulta. Sus dos ajustes se aplicaron y se revisaron: el menú móvil cerrado no recibe foco y el botón anuncia su estado; la fecha pasó a información de apoyo debajo del H1. El veredicto se limita a esas correcciones y al código. Sin navegador ni nuevas capturas, no acredita composición renderizada, interacción de teclado ni responsive visual.
+
+## Limpieza posterior del proyecto
+
+Se retiraron 82 archivos versionados sin uso en el flujo activo: catálogo UI, auxiliares de ese catálogo, ejemplos, recursos iniciales, scripts npm heredados, configuración de shadcn/Tailwind y metadatos temporales de diseño. Se eliminaron 21 dependencias directas; pnpm retiró 142 paquetes de la instalación y actualizó su lockfile.
+
+Tras la limpieza aprobaron TypeScript, diez pruebas de dominio/cliente HTTP, siete pruebas SQL, el build y la integración Worker + D1 aislada. Las páginas públicas, la autorización, la solicitud idempotente, la confirmación, la consulta y la recarga permanecen comprobadas. Se preservaron la base local, la configuración del hosting, las demos activas, las migraciones, las pruebas y los documentos del TP.
