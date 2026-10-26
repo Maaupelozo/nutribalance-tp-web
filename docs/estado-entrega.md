@@ -17,13 +17,13 @@ La matriz corresponde al escenario 2 y a los requisitos comunes de la consigna o
 | Análisis funcional | [Problema, usuarios, alcance y requisitos](analisis-funcional.md) | Validación y revisión por el equipo |
 | UI/UX y prototipo | Prototipos navegables `/demo-profesional` y `/demo-paciente`; captura conservada | Adjuntar wireframes y enlace/capturas del prototipo utilizado por el equipo |
 | Responsive y accesibilidad | CSS adaptable, labels, foco, modales, mensajes y revisión previa documentada | Revisión visual de esta versión y teléfono físico; no hubo navegador automatizable disponible |
-| Página pública y solicitud | HTML renderizado y formulario conectado a `/api/solicitudes` | Probar como visitante externo tras autorizar audiencia pública |
-| Pacientes, turnos e historial | Worker + D1 aislada y siete pruebas SQL | Recorrido manual en producción con cuenta profesional autorizada |
+| Página pública y solicitud | HTML renderizado, inicio anónimo 200 y solicitud HTTP 201 guardada en D1 | Recorrido visual desde un navegador externo |
+| Pacientes, turnos e historial | Worker + D1 aislada, siete pruebas SQL y paciente/turno ficticios comprobados en D1 de producción | Consulta e historial manuales en producción con cuenta profesional autorizada |
 | Autenticación | 401 anónimo y 403 cuenta sin permiso en Worker | Probar entrada/salida real de la cuenta usada en la defensa |
 | Modelo de datos | [Esquema y explicación](modelo-datos.md), Drizzle y SQL | Revisión oral por todos los integrantes |
-| SEO | Prueba de HTML: H1, description, canonical, sitemap y robots | Lighthouse/PageSpeed u otra medición verificable |
-| Deploy | Sitio existente en Sites con D1 | Confirmar publicación de los cambios y probar flujo desplegado |
-| URL pública | URL de Sites existente | Audiencia privada del propietario: requiere decisión explícita para abrirla |
+| SEO | Prueba de HTML: H1, description, canonical, sitemap y robots | Medición Lighthouse/PageSpeed; la API de Google devuelve 429 por cuota |
+| Deploy | Cambios publicados en Sites con D1 y comprobación HTTP | Recorrido visual del flujo profesional |
+| URL pública | Audiencia pública autorizada; inicio anónimo 200 y API privada 401 | Mantener acceso para la defensa |
 | Git/GitHub | Historial recuperado, rama de trabajo y respaldo local | Repositorio GitHub del equipo con acceso e integrantes reales |
 | Documento final y uso de IA | README y [guía de defensa](defensa.md) | Completar distribución real de tareas y dificultades del equipo |
 
@@ -33,7 +33,7 @@ Antes de la defensa, completá estos pasos:
 
 1. Revisá el código y ensayá las explicaciones de la [guía de defensa](defensa.md). No atribuyas a integrantes contribuciones no verificadas.
 2. Publicá el código en el GitHub del equipo conservando su historial. Asociá la versión demostrada con su commit real.
-3. Decidí explícitamente abrir la audiencia del sitio para cumplir la URL pública. La autorización del panel debe seguir restringida por servidor.
+3. Comprobá el acceso público desde otro dispositivo. El propietario ya autorizó abrir la audiencia; mantené la autorización del panel en servidor.
 4. Con una cuenta autorizada, recorré solicitud, confirmación, consulta e historial en producción. Usá exclusivamente datos ficticios y recargá para comprobar persistencia.
 5. Verificá el acceso anónimo a páginas públicas y la denegación de datos privados.
 6. Revisá móvil, teclado y errores; obtené el reporte Lighthouse/PageSpeed sin inventar resultados.

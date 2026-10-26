@@ -8,9 +8,9 @@ El código recuperado de Sites parte del commit `8d56c797ab281f2858ba8982a36f0cc
 
 Las peticiones HTTPS a `/api/v1/auth/csrf` y `/api/v1/availability?date=2026-10-27` de `https://api.neadev.com` responden **HTTP 530, Cloudflare 1033**. Esto impide comprobar la API; no demuestra que no exista código en otro entorno. No se probó un login ni una escritura contra Express.
 
-La inspección de D1 desplegada confirma las tablas `patients`, `appointments`, `consultations`, `schedule_blocks` y `app_state`. Las tres tablas del flujo principal están vacías al revisarlas. Tener las tablas no acredita un recorrido de producción ya realizado.
+La inspección inicial de D1 desplegada confirmó las tablas `patients`, `appointments`, `consultations`, `schedule_blocks` y `app_state`, con las tres entidades principales vacías. Después de publicar los cambios, una prueba HTTP dejó un paciente ficticio y un turno pendiente con código `NT-F4C738E4CD`; una lectura independiente de D1 confirmó ambos registros y la ausencia de duplicados tras reenviar. La consulta profesional en producción sigue pendiente; el flujo completo se prueba en D1 aislada.
 
-El sitio conserva audiencia privada del propietario. La URL es `https://nutribalance-mauricio.maauri.chatgpt.site`; todavía no acredita acceso público para el evaluador.
+El propietario autorizó la audiencia pública el 26 de octubre de 2026. La URL es `https://nutribalance-mauricio.maauri.chatgpt.site`. Se verificó HTTP 200 en inicio sin credenciales y HTTP 401 en la API del panel anónimo. La autorización profesional del servidor se conserva.
 
 ## Fuentes del contrato
 

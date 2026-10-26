@@ -23,7 +23,7 @@ La ejecución de cada prueba debe verificarse antes de presentar su resultado co
 1. Revisión complementaria en un teléfono físico y contraste con herramienta específica.
 2. Reporte Lighthouse/PageSpeed en una URL pública accesible. No se declara una puntuación no medida.
 3. Publicar el repositorio en GitHub con historial y participación del equipo.
-4. Habilitar la audiencia pública del sitio si el propietario lo autoriza; el panel mantiene su autorización propia.
+4. Mantener la audiencia pública ya autorizada y comprobar el acceso externo; el panel mantiene su autorización propia.
 5. Adjuntar prototipo y análisis, modelo, documentación final y uso de IA.
 6. Ensayar el flujo con las cuentas autorizadas que se usarán en la defensa.
 
@@ -67,10 +67,16 @@ La revisión parte del commit `8d56c797ab281f2858ba8982a36f0cce6e18a111`. Se eje
 | Conflicto de revisión | HTTP 409 y `Cache-Control: no-store` |
 | Sesión vencida | Pruebas del cliente preservan 401 y verifican un solo envío, sin reintento automático |
 | API Express externa | Bloqueada: HTTP 530, Cloudflare 1033 en CSRF y disponibilidad |
-| D1 desplegada | Tablas presentes; pacientes, turnos y consultas vacíos al inspeccionarlos |
+| D1 desplegada, antes de la prueba | Tablas presentes; pacientes, turnos y consultas vacíos |
 | Navegador y responsive de esta iteración | Sin verificar: el inventario de navegadores de automatización está vacío |
-| Lighthouse/PageSpeed | Pendiente; no se atribuye una puntuación |
+| Lighthouse/PageSpeed | Pendiente; la API de PageSpeed devuelve 429 por cuota agotada, sin puntuación |
 
 Las pruebas de Worker ejecutan SQL real en D1 local aislada. No constituyen una prueba de producción ni de PostgreSQL. La cuenta de preview y `.dev.vars` son ficticias, locales e ignoradas por Git.
 
 La instalación inicial venció durante descargas y se reanudó con la caché y un tiempo de espera mayor, sin cambiar las versiones del lockfile. En este equipo el runner de Node y el build necesitaron ejecución fuera de la restricción que impedía crear procesos; los primeros fallos de `spawn EPERM` no fueron fallos de las reglas de negocio.
+
+## Comprobación posterior a la publicación
+
+La versión 5 publicada corresponde al commit `2d0975844547139237fcc6b49c0ac2da6fc3a632`. Una petición real a `/api/solicitudes` devuelve 201 y el código `NT-F4C738E4CD`, para el 28 de octubre de 2026 a las 15:00 Argentina. El reenvío con la misma clave y otra hora devuelve el mismo comprobante. La lectura independiente de D1 encuentra un paciente ficticio y un turno pendiente con ese código; ninguna consulta ni duplicados. Esto acredita solicitud y persistencia de producción, no el recorrido profesional completo.
+
+El propietario autorizó el acceso público. Después del cambio se comprobó el inicio sin credenciales (200) y la API del panel anónima (401, `Cache-Control: no-store`). El acceso público al sitio no concede identidad ni permisos profesionales.

@@ -2,7 +2,7 @@
 
 MVP del **escenario 2: NutriTurnos**, adaptado al proyecto NutriBalance. Permite presentar el servicio, solicitar un turno, revisarlo desde el panel profesional y registrar una consulta en el historial del paciente.
 
-Versión publicada: https://nutribalance-mauricio.maauri.chatgpt.site (conserva acceso privado del propietario).
+Versión publicada: https://nutribalance-mauricio.maauri.chatgpt.site (acceso público autorizado por el propietario; panel protegido por servidor).
 
 **Solo datos ficticios.** Esta aplicación es una entrega académica, no un sistema clínico listo para uso real.
 
@@ -43,7 +43,7 @@ El flujo comprobable utiliza D1. La integración Express del compañero se conse
 | `/api/panel` | GET de datos y POST de cambios | Identidad + permiso profesional |
 | `/robots.txt`, `/sitemap.xml` | SEO de las páginas públicas | Sin información clínica |
 
-**Visibilidad del hosting:** se conserva la configuración privada del sitio original hasta que el propietario solicite abrirlo para la defensa. La página pública de la aplicación y el permiso global de hosting son capas diferentes. Hay que habilitar acceso público antes de presentar el requisito de URL pública como cumplido.
+**Visibilidad del hosting:** el propietario autorizó el acceso público el 26 de octubre de 2026. Se comprobó el inicio con HTTP 200 sin credenciales y la API del panel con HTTP 401 para un visitante anónimo. El acceso público al sitio no concede permisos profesionales.
 
 ## Estructura
 
@@ -127,7 +127,7 @@ En Windows, `install:ci` heredado requiere Bash; podés instalar con `pnpm insta
 
 Ver [análisis funcional](docs/analisis-funcional.md), [modelo de datos](docs/modelo-datos.md), [guía de defensa](docs/defensa.md), [verificación](docs/verificacion.md) y [estado de entrega](docs/estado-entrega.md).
 
-Pendientes del equipo: publicar este código en su repositorio GitHub, identificar los integrantes y sus contribuciones reales, adjuntar el enlace/capturas del prototipo, autorizar la URL pública y completar la medición Lighthouse/PageSpeed y la revisión final en un celular.
+Pendientes del equipo: publicar este código en su repositorio GitHub, identificar los integrantes y sus contribuciones reales, adjuntar el enlace/capturas del prototipo y completar la medición Lighthouse/PageSpeed y la revisión final en un celular.
 
 ## Uso de IA
 
