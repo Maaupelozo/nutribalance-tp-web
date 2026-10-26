@@ -22,7 +22,7 @@ export default function Home(){return <div className="public-page editorial-home
         <h1 id="hero-title">Una alimentación que encuentre lugar <em>en tu vida.</em></h1>
         <p>Un primer encuentro para conversar sobre tus hábitos, definir objetivos y construir los próximos pasos.</p>
         <div className="hero-actions"><a className="btn" href="/solicitar-turno">Solicitar un turno <ArrowUpRight size={19}/></a><a className="textbutton" href="#el-enfoque">Conocer el enfoque <ArrowRight size={17}/></a></div>
-        <div className="hero-reassurance"><Check size={16}/><span>Elegís una fecha preferida. Mauricio confirma el horario.</span></div>
+        <div className="hero-reassurance"><Check size={16}/><span>Elegís un horario disponible. Mauricio confirma el turno.</span></div>
       </div>
       <aside className="signature-panel" aria-label="Mauricio Pelozo, nutrición">
         <div className="signature-top"><span>NutriBalance</span><span>Nutrición</span></div>
@@ -44,7 +44,7 @@ export default function Home(){return <div className="public-page editorial-home
     </section>
     <section className="booking-section" aria-labelledby="booking-title">
       <div><h2 id="booking-title">Nos encontramos<br/><em>por acá.</em></h2><p>Solicitar un turno lleva tres pasos. El horario queda pendiente hasta su confirmación.</p><a className="btn" href="/solicitar-turno">Elegir una fecha <ArrowUpRight size={19}/></a></div>
-      <ol className="booking-steps"><li><span>01</span><div><h3>Contanos cómo contactarte</h3><p>Completá tus datos y elegí una fecha y hora preferidas.</p></div></li><li><span>02</span><div><h3>Esperá la confirmación</h3><p>Mauricio revisa la solicitud y confirma o coordina otro horario.</p></div></li><li><span>03</span><div><h3>Empezá tu seguimiento</h3><p>En consulta se registran los objetivos y las indicaciones.</p></div></li></ol>
+      <ol className="booking-steps"><li><span>01</span><div><h3>Contanos cómo contactarte</h3><p>Completá tus datos y elegí un horario disponible.</p></div></li><li><span>02</span><div><h3>Esperá la confirmación</h3><p>Mauricio revisa la solicitud y confirma o coordina otro horario.</p></div></li><li><span>03</span><div><h3>Empezá tu seguimiento</h3><p>En consulta se registran los objetivos y las indicaciones.</p></div></li></ol>
     </section>
     <section className="public-faq" aria-labelledby="faq-title">
       <div><h2 id="faq-title">Antes de<br/><em>encontrarnos.</em></h2><p>Lo que necesitás saber para solicitar tu turno.</p></div>

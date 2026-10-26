@@ -1,141 +1,86 @@
-# NutriBalance · TP Integrador de Desarrollo Web 2026
+﻿# NutriBalance · TP Integrador de Desarrollo Web 2026
 
-MVP del **escenario 2: NutriTurnos**, adaptado al proyecto NutriBalance. Permite presentar el servicio, solicitar un turno, revisarlo desde el panel profesional y registrar una consulta en el historial del paciente.
+Aplicación del escenario 2, NutriTurnos: página de Mauricio Pelozo, solicitud de turnos, acceso profesional, pacientes e historial de consultas.
 
-Versión publicada: https://nutribalance-mauricio.maauri.chatgpt.site (acceso público autorizado por el propietario; panel protegido por servidor).
+Sitio: https://nutribalance-mauricio.maauri.chatgpt.site
 
-**Solo datos ficticios.** Esta aplicación es una entrega académica, no un sistema clínico listo para uso real.
+**Usá únicamente datos ficticios.** Las credenciales de prueba se entregan por separado y no forman parte del código.
 
 ## Flujo principal
 
-1. Visitar `/` y abrir `/solicitar-turno`.
-2. Enviar nombre, correo, teléfono, fecha y hora preferidos. La solicitud se guarda en D1 con estado pendiente.
-3. Acceder a `/ingresar` con una cuenta profesional autorizada.
-4. Abrir `/panel`, actualizar los datos y revisar el turno en la agenda o ficha del paciente.
-5. Confirmar o reprogramar. Los turnos confirmados no pueden superponerse entre sí ni con un bloqueo.
-6. Abrir el turno, seleccionar **Registrar consulta** y completar motivo, medidas, observaciones, objetivos y plan/indicaciones.
-7. Guardar. La consulta se incorpora al historial y el turno asociado pasa a atendido. Recargar para comprobar persistencia.
+1. Abrí `/solicitar-turno`, elegí una fecha y un horario disponible de Argentina.
+2. Enviá nombre, teléfono y, opcionalmente, correo. La API genera un turno pendiente y su comprobante UUID; todavía no crea una ficha clínica.
+3. Ingresá en `/ingresar` con la cuenta profesional creada en Express.
+4. Buscá o creá la ficha del paciente y vinculala al confirmar la solicitud en Agenda.
+5. Desde un turno confirmado que ya comenzó, abrí **Registrar consulta**. Al guardar una consulta vinculada, Express debe marcar el turno como atendido en la misma transacción.
+6. También podés registrar una consulta independiente desde la ficha. Esa consulta no modifica ningún turno.
+7. Recargá el historial y cerrá la sesión al terminar.
 
-La solicitud pública no expone huecos de agenda ni confirma automáticamente una reserva. La profesional conserva el control del horario definitivo.
+Los turnos duran 30 minutos, de lunes a viernes entre 09:00 y 17:00, con un horizonte de 60 días. Cancelar libera el horario. Para reprogramar, cancelá y solicitá un nuevo turno.
 
-## Stack y justificación
+## Arquitectura
 
-- **React + TypeScript:** frontend existente y tipos compartidos entre formularios, cliente HTTP y servidor.
-- **CSS propio:** dirección editorial con verde bosque/marfil, títulos Source Serif 4, interfaz Manrope y fuentes WOFF2 locales. Tokens compartidos, foco visible y movimiento reducido.
-- **Vinext/Vite:** renderizado de páginas públicas y rutas HTTP en un mismo proyecto. Conserva la integración de hosting del proyecto original.
-- **Cloudflare Workers:** backend mínimo; dos endpoints para el flujo principal.
-- **D1 (SQLite) + Drizzle:** relaciones entre pacientes, turnos y consultas; migraciones SQL versionadas. No se usa `localStorage` como reemplazo de la base de datos del flujo obligatorio.
-- **Autenticación de la plataforma:** inicio de sesión con ChatGPT y lista de cuentas autorizadas en el servidor. No se inventa un login de contraseña en el navegador.
+- React, TypeScript y CSS propio: interfaz editorial en verde bosque y marfil; fuentes locales Manrope y Source Serif 4.
+- Vinext/Vite y Cloudflare Worker: páginas públicas y gateway HTTP.
+- Express en `https://api.neadev.com/api/v1`: sesiones, pacientes, disponibilidad, turnos y consultas. El contrato del equipo especifica PostgreSQL; este repositorio no contiene el servidor ni sus migraciones.
+- Gateway fijo `/api/v1/*`: reenvía únicamente las rutas del contrato y la cookie `nutri.sid`. Mantiene la sesión en el mismo origen del sitio para evitar depender de cookies de terceros. No acepta destinos arbitrarios ni reenvía la identidad de la plataforma.
+- Sesión administrada por Express, cookie HttpOnly/Secure y token CSRF en memoria. No se guardan contraseñas, sesiones ni historias clínicas en `localStorage`.
 
-El flujo comprobable utiliza D1. La integración Express del compañero se conserva como evolución pendiente de un servidor operativo. Ver [comparación y plan de integración](docs/integracion-api.md), con el contrato recibido y los criterios para cambiar de backend.
+Los endpoints D1 anteriores y las migraciones permanecen como respaldo. La interfaz principal ya no los utiliza. Los prototipos `/demo-profesional` y `/demo-paciente` siguen siendo demostraciones con datos locales, separadas del panel conectado.
 
 ## Rutas
 
-| Ruta | Finalidad | Acceso |
-|---|---|---|
-| `/` | Presentación del servicio, CTA y preguntas frecuentes | Compatible con visitantes anónimos |
-| `/solicitar-turno` | Formulario y comprobante de solicitud | Compatible con visitantes anónimos |
-| `/ingresar` | Inicio de sesión profesional | Identidad de plataforma |
-| `/panel` | Agenda, pacientes e historial | Cuenta autorizada, comprobación en servidor |
-| `/demo-paciente` | Complemento visual con datos ficticios locales | Demostración, no acceso a la BD clínica |
-| `/demo-profesional` | Prototipo visual anterior para revisión de UI | Demostración, no acceso a la BD clínica |
-| `/api/solicitudes` | POST de solicitud pública | Datos mínimos; no permite consultar historiales |
-| `/api/panel` | GET de datos y POST de cambios | Identidad + permiso profesional |
-| `/robots.txt`, `/sitemap.xml` | SEO de las páginas públicas | Sin información clínica |
+| Ruta | Uso |
+|---|---|
+| `/` | Presentación y preguntas frecuentes |
+| `/solicitar-turno` | Disponibilidad y solicitud pública |
+| `/ingresar` | Correo y contraseña de Express |
+| `/panel` | Resumen, pacientes, agenda, ficha e historial; Express autoriza cada operación privada |
+| `/api/v1/*` | Gateway limitado al contrato externo |
+| `/demo-profesional`, `/demo-paciente` | Prototipos visuales, sin acceso a datos de Express |
+| `/api/panel`, `/api/solicitudes` | Implementación D1 anterior, conservada como respaldo |
 
-**Visibilidad del hosting:** el propietario autorizó el acceso público el 26 de octubre de 2026. Se comprobó el inicio con HTTP 200 sin credenciales y la API del panel con HTTP 401 para un visitante anónimo. El acceso público al sitio no concede permisos profesionales.
+El sitio es público. Eso no concede acceso a pacientes ni consultas: Express exige una sesión profesional en cada endpoint privado. El HTML inicial del panel contiene una pantalla de carga, sin datos clínicos.
 
-## Estructura
+## Ejecutar en desarrollo
 
-```text
-app/page.tsx                  Página pública renderizada en servidor
-app/solicitar-turno/           Solicitud de turno
-app/ingresar/                 Acceso profesional
-app/panel/                    Página protegida y dashboard
-app/api/                      Backend mínimo
-components/public/            Cabecera y formulario público
-lib/types.ts                  Tipos del dominio
-lib/api-client.ts             Cliente HTTP y detección de cambios
-lib/validation.ts             Validaciones puras
-lib/server/                   Autorización y repositorio SQL
-lib/demo-data.ts              Ejemplos ficticios de los prototipos
-app/globals.css               Entrada de estilos
-app/styles/                   Tokens, bases, páginas públicas y panel
-db/schema.ts                  Esquema Drizzle
-drizzle/                      Migraciones SQL y metadatos
-tests/                        Validación del dominio, BD y Worker
-docs/                         Análisis, modelo de datos y defensa
-```
-
-## Ejecución local
-
-Requisitos: Node.js 22.13 o superior, pnpm y Python 3 (solo para pruebas SQL). Instalar las versiones bloqueadas por `pnpm-lock.yaml`:
+Requisitos: Node.js 22.13 o superior y pnpm 11.25.0.
 
 ```sh
 pnpm install --frozen-lockfile
-```
-
-Copiar `.env.example` a `.dev.vars` y completar `PROFESSIONAL_EMAILS` únicamente en ese archivo ignorado. No subir cuentas autorizadas ni secretos al repositorio.
-
-Una descarga o clon limpio usa automáticamente el perfil portable en Windows/macOS/Linux. En ese perfil, la autenticación simulada es `seedy@sites.test`, exclusiva de loopback; agregarla a la configuración **local** para probar el panel. La identidad simulada no debe habilitarse ni autorizarse en producción.
-
-Construir una vez para obtener la configuración de D1:
-
-```sh
-pnpm build
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_chubby_blue_marvel.sql
 pnpm dev
 ```
 
-Aplicar la migración solo una vez por base local. Si se agregan migraciones, ejecutarlas en orden. Los datos de desarrollo y producción son independientes. Para publicar se utiliza el flujo de Sites, que aplica las migraciones de producción.
+Abrí `http://localhost:5173`. Ese origen debe estar permitido por el backend. No se necesita copiar la contraseña a una variable de entorno: se introduce en el formulario de acceso.
 
-## Variables de servidor
+Para el respaldo D1, `.env.example` documenta `PROFESSIONAL_EMAILS`. Ese valor solo se configura en el servidor; no interviene en el login Express. Las migraciones están en `drizzle/`.
 
-- `PROFESSIONAL_EMAILS`: lista de correos profesionales autorizados, separados por comas. Se configura como secreto de entorno del hosting; el frontend no recibe la lista.
-- `DB`: binding D1, declarado en `.openai/hosting.json` y provisionado por el hosting.
-
-La sesión de ChatGPT demuestra identidad; el servidor valida además la pertenencia a la lista profesional. Un usuario autenticado cualquiera no obtiene acceso al panel.
-
-## Verificación
+## Verificar
 
 ```sh
 pnpm exec tsc --noEmit
 pnpm test
-python3 tests/database_test.py
 pnpm build
 node --import ./scripts/sites-env.mjs tests/worker-flow.mjs
 ```
 
-La prueba del Worker usa el build real con una base D1 aislada en Miniflare; no modifica producción. Verifica 401/403, solicitud, prevención de duplicados, confirmación, control de versión, consulta y recarga.
+Las pruebas unitarias cubren CSRF, rotación de sesión, cierre 204, conflictos, límites de reintento y restricciones del gateway. `worker-flow.mjs` verifica el respaldo D1 en una base aislada.
 
-En Windows, `install:ci` heredado requiere Bash; podés instalar con `pnpm install --frozen-lockfile` desde PowerShell. Usá pnpm 11.25.0 según `packageManager`. Si una descarga vence, repetí la instalación con `--fetch-timeout=180000 --network-concurrency=4`; conserva la caché y el lockfile. Para las pruebas SQL, usá el ejecutable Python 3 disponible en tu equipo.
+La prueba optativa `tests/express-live-flow.mjs` usa el Worker compilado contra Express real. Recibe un objeto JSON con `email` y `password` por stdin; si se ejecuta en una terminal interactiva, oculta la entrada. **Crea una ficha y consulta ficticias y cancela su turno de prueba**. No debe ejecutarse como parte de las pruebas unitarias. Con `--production --read-only` y un `patientId` de prueba verifica la publicación sin crear registros nuevos.
 
-## Alcance y límites
+No incluyas credenciales en argumentos, archivos, Git ni capturas.
 
-- Persistencia del MVP: pacientes (incluidos datos de contacto), agenda, bloqueos y consultas.
-- Consultas finalizadas: no se sobrescriben; los registros anteriores se conservan.
-- Solicitudes públicas: idempotentes por identificador; repetir el mismo envío no crea otro turno.
-- Comprobante: fecha y hora provienen del registro guardado, también cuando un reintento trae preferencias distintas.
-- Consulta finalizada vinculada: el servidor guarda la consulta y marca el turno atendido en la misma transacción, aunque el cliente no envíe un cambio de estado separado.
-- Borradores: disponibles en el prototipo visual; el panel persistente ofrece consultas finalizadas porque no implementa reapertura/edición de borradores.
-- Sesión vencida durante un guardado: el formulario sigue abierto y permite ingresar en otra pestaña. Volvé al formulario para reenviar conscientemente; no hay reintento automático.
-- Cambios simultáneos: control de revisión para evitar sobrescribir una modificación de otra sesión. Ante conflicto, actualizar datos y reintentar.
-- Complementos heredados: pagos, archivos, diario, token, objetivos adicionales y configuración visual no integran el flujo persistente obligatorio. No presentarlos como almacenamiento clínico de servidor.
-- No hay recordatorios automáticos, facturación, firma electrónica, IA clínica ni receta digital.
-- No se cargan automáticamente datos del prototipo local a la base de producción.
+## Archivos principales
 
-## Entrega y defensa
+| Archivo | Responsabilidad |
+|---|---|
+| `lib/express-api.ts` | Cliente tipado, sesión, CSRF, recursos y fechas |
+| `lib/server/express-gateway.ts` | Rutas permitidas, cookies, origen y timeout |
+| `app/api/v1/[...path]/route.ts` | Entrada HTTP del gateway |
+| `components/public/LoginForm.tsx` | Acceso profesional |
+| `components/public/RequestForm.tsx` | Horarios, solicitud y comprobante |
+| `app/panel/ExpressDashboard.tsx` | Panel conectado a Express |
+| `app/panel/Dashboard.tsx` | Prototipos y versión D1 anterior |
+| `docs/api-externa/` | Contrato original recibido, sin credenciales |
 
-El [rediseño editorial](docs/rediseno-editorial.md) explica la nueva identidad, composición, formulario y prioridades del panel. Los estilos heredados se conservan en una capa de compatibilidad. La revisión visual en navegador y móvil sigue pendiente: el entorno no dispone de navegador automatizable.
-
-Ver [análisis funcional](docs/analisis-funcional.md), [modelo de datos](docs/modelo-datos.md), [guía de defensa](docs/defensa.md), [verificación](docs/verificacion.md) y [estado de entrega](docs/estado-entrega.md).
-
-Pendientes del equipo: publicar este código en su repositorio GitHub, identificar los integrantes y sus contribuciones reales, adjuntar el enlace/capturas del prototipo y completar la medición Lighthouse/PageSpeed y la revisión final en un celular.
-
-## Limpieza del proyecto
-
-La limpieza del proyecto retiró 61 componentes de catálogo sin consumidores, auxiliares y ejemplos ajenos al flujo, SVG iniciales, vendor, scripts npm antiguos y metadatos temporales del asistente. Se quitaron 21 dependencias directas sin uso, incluidas las del catálogo y Tailwind; el CSS propio se procesa con Vite. Se conservan las rutas de demostración, el contexto de diseño en `DESIGN.md`/`PRODUCT.md`, la documentación del TP y las herramientas necesarias para Sites/D1.
-
-## Uso de IA
-
-Se utilizó IA como apoyo para prototipado, generación de código, revisión y documentación. El equipo debe revisar lo incorporado y poder explicar los componentes, las validaciones, la autorización, el modelo relacional, las transacciones y el despliegue. No atribuir al equipo pruebas, entrevistas o decisiones que no haya realizado o validado.
+Consultá [la integración](docs/integracion-api.md), [la verificación](docs/verificacion.md) y [el estado de entrega](docs/estado-entrega.md) para conocer la evidencia y los pendientes.

@@ -1,5 +1,15 @@
 # Verificación y pendientes de entrega
 
+## Integración Express — 26 de octubre de 2026
+
+TypeScript, compilación y pruebas unitarias del cliente/gateway: aprobadas. La ejecución del Worker compilado contra la API real verificó login, 401 anónimo, CSRF inválido 403, validación 400, alta/edición/recarga de paciente, solicitud 201, conflicto de slot 409, confirmación vinculada, consulta independiente e historial, cancelación/liberación de horario y logout 204 con posterior 401.
+
+La ficha ficticia de verificación tiene UUID `51581661-7a50-4887-a845-681167437ccb`; la consulta `6e46ff37-83ef-4053-bcca-49c77e11eabf`. El turno `21380706-5943-4911-b39f-9580081a4e59` quedó cancelado. No se guardaron credenciales en archivos. Estas lecturas no acreditan inspección directa ni reinicio de PostgreSQL.
+
+Pendientes: revisión en navegador, móvil y teclado; consulta vinculada a un turno que ya comenzó; persistencia después de reiniciar el backend. No hubo un navegador automatizable disponible. Ver [la integración](integracion-api.md) y la prueba optativa `tests/express-live-flow.mjs`.
+
+Las secciones de dominio, SQL y D1 siguientes documentan el respaldo anterior. No deben atribuirse al backend Express.
+
 ## Pruebas automáticas
 
 - Dominio: fechas reales/bisiestas, solicitud ficticia, correo, horario, estados, medidas, tamaños e identificadores.

@@ -1,63 +1,38 @@
-# Estado de entrega del TP
+﻿# Estado de entrega del TP
 
-Este documento permite al equipo preparar la defensa de NutriBalance y distinguir evidencia comprobada de tareas pendientes. Fecha de revisión: 26 de octubre de 2026. La consigna original fija la entrega y defensa final para esa fecha y la recuperación para el 16 de noviembre de 2026.
+Revisión del 26 de octubre de 2026. Este documento distingue el flujo disponible de la evidencia y los pendientes del equipo.
 
 ## Flujo disponible
 
-El código implementa página profesional, solicitud pública, autorización del panel, agenda, alta/edición de pacientes, ficha, consulta e historial sobre D1. El flujo se prueba con el Worker compilado y una base D1 local aislada. La consulta finalizada y el estado atendido se guardan desde el servidor dentro de una misma transacción.
+La interfaz principal utiliza la API Express: disponibilidad, solicitud pública, login por correo/contraseña, pacientes, confirmación vinculada a una ficha, consulta e historial. El sitio mantiene su audiencia pública y Express protege cada operación privada.
 
-El contrato Express está conservado en el repositorio, junto con su [plan de integración](integracion-api.md). El cliente Express no está implementado. La API externa devuelve Cloudflare 1033 y no permite comprobar persistencia ni sesión.
+La versión D1 anterior conserva sus rutas, migraciones y pruebas como respaldo. Sus datos son independientes de Express. Los prototipos de profesional y paciente utilizan datos locales de ejemplo.
 
-## Requisitos y evidencia
+## Evidencia y pendientes
 
-La matriz corresponde al escenario 2 y a los requisitos comunes de la consigna original:
-
-| Requisito | Evidencia disponible | Pendiente |
+| Área | Comprobado | Pendiente |
 |---|---|---|
-| Análisis funcional | [Problema, usuarios, alcance y requisitos](analisis-funcional.md) | Validación y revisión por el equipo |
-| UI/UX y prototipo | Prototipos navegables `/demo-profesional` y `/demo-paciente`; captura conservada | Adjuntar wireframes y enlace/capturas del prototipo utilizado por el equipo |
-| Responsive y accesibilidad | CSS adaptable, labels, foco, modales, mensajes y revisión previa documentada | Revisión visual de esta versión y teléfono físico; no hubo navegador automatizable disponible |
-| Página pública y solicitud | HTML renderizado, inicio anónimo 200 y solicitud HTTP 201 guardada en D1 | Recorrido visual desde un navegador externo |
-| Pacientes, turnos e historial | Worker + D1 aislada, siete pruebas SQL y paciente/turno ficticios comprobados en D1 de producción | Consulta e historial manuales en producción con cuenta profesional autorizada |
-| Autenticación | 401 anónimo y 403 cuenta sin permiso en Worker | Probar entrada/salida real de la cuenta usada en la defensa |
-| Modelo de datos | [Esquema y explicación](modelo-datos.md), Drizzle y SQL | Revisión oral por todos los integrantes |
-| SEO | Prueba de HTML: H1, description, canonical, sitemap y robots | Medición Lighthouse/PageSpeed; la API de Google devuelve 429 por cuota |
-| Deploy | Cambios publicados en Sites con D1 y comprobación HTTP | Recorrido visual del flujo profesional |
-| URL pública | Audiencia pública autorizada; inicio anónimo 200 y API privada 401 | Mantener acceso para la defensa |
-| Git/GitHub | Historial recuperado, rama de trabajo y respaldo local | Repositorio GitHub del equipo con acceso e integrantes reales |
-| Documento final y uso de IA | README y [guía de defensa](defensa.md) | Completar distribución real de tareas y dificultades del equipo |
+| Sesión | Login 200, usuario profesional, CSRF inválido 403, anónimo 401, logout 204 y sesión invalidada | Recorrido visual con la cuenta usada en la defensa |
+| Pacientes | Alta, edición y recuperación posterior por HTTP contra Express | Inspección de migraciones/BD en el repositorio del backend |
+| Turnos | Disponibilidad, solicitud 201, conflicto 409, confirmación con paciente, cancelación y liberación del slot | Prueba simultánea con dos navegadores |
+| Consultas | Consulta independiente guardada y recuperada en historial contra Express | Consulta vinculada a un turno confirmado que ya comenzó |
+| Interfaz | TypeScript, compilación y pruebas de cliente/gateway | Revisión visual, teclado y dispositivo móvil; no hubo navegador automatizable disponible |
+| Respaldo D1 | Pruebas de dominio, SQL y Worker aislado conservadas | No atribuir esos resultados a PostgreSQL |
+| Persistencia externa | Lecturas independientes recuperan paciente y consulta | Reiniciar Express y verificar persistencia; no hubo acceso directo al servidor |
+| Git y entrega | Fuente, README, contrato y plan de integración | GitHub del equipo, integrantes y contribuciones reales |
+| SEO y rendimiento | Metadatos, canonical, sitemap, robots y fuentes locales | Medición actual Lighthouse/PageSpeed |
 
-## Prepará la demostración
+La prueba real dejó una ficha y consulta ficticias identificadas como verificación. El turno utilizado quedó cancelado. No se trasladaron ni borraron datos D1.
 
-Antes de la defensa, completá estos pasos:
+## Preparar la demostración
 
-1. Revisá el código y ensayá las explicaciones de la [guía de defensa](defensa.md). No atribuyas a integrantes contribuciones no verificadas.
-2. Publicá el código en el GitHub del equipo conservando su historial. Asociá la versión demostrada con su commit real.
-3. Comprobá el acceso público desde otro dispositivo. El propietario ya autorizó abrir la audiencia; mantené la autorización del panel en servidor.
-4. Con una cuenta autorizada, recorré solicitud, confirmación, consulta e historial en producción. Usá exclusivamente datos ficticios y recargá para comprobar persistencia.
-5. Verificá el acceso anónimo a páginas públicas y la denegación de datos privados.
-6. Revisá móvil, teclado y errores; obtené el reporte Lighthouse/PageSpeed sin inventar resultados.
-7. Adjuntá análisis, wireframes/prototipo, modelo de datos, README, evidencias y distribución real de tareas.
+1. Comprobá el acceso público desde otro dispositivo y el login profesional.
+2. Solicitá un horario disponible con datos ficticios, buscá o creá una ficha y confirmá el turno vinculándola.
+3. Para mostrar una consulta vinculada, usá un turno confirmado cuyo horario ya comenzó. Si todavía está en el futuro, mostrá una consulta independiente y explicá esa diferencia.
+4. Recargá el historial y cerrá sesión; verificá que un visitante no puede leer pacientes.
+5. Adjuntá prototipo, análisis, modelo real del backend, reporte de rendimiento y distribución de tareas.
+6. Revisá el código y ensayá la [guía de defensa](defensa.md). No inventes participación, pruebas ni métricas.
 
-Si Express no está operativo, presentá la persistencia D1 que puedas demostrar. Explicá Express como integración pendiente y sus diferencias; no muestres `ejemplos.json` como una base real.
+## Recuperar la versión anterior
 
-## Reproducí las comprobaciones
-
-Con Node.js 22.13 o superior, pnpm 11.25.0 y Python 3, ejecutá desde la raíz del proyecto:
-
-```sh
-pnpm install --frozen-lockfile
-pnpm exec tsc --noEmit
-pnpm test
-python3 tests/database_test.py
-pnpm build
-node --import ./scripts/sites-env.mjs tests/worker-flow.mjs
-```
-
-En Windows, sustituí `python3` por la ruta del Python 3 instalado si ese comando no existe. El test del Worker crea una base aislada y no escribe en producción. Consultá [la verificación](verificacion.md) para conocer el alcance de cada resultado.
-
-## Conservá una ruta de retorno
-
-La rama local es `tp/cierre-integracion`. La etiqueta local `respaldo-v4-2026-10-26` identifica la fuente recuperada antes de cambios y `respaldo-v7-antes-redisenio` conserva el punto anterior al rediseño. El respaldo ZIP temporal se retiró en la limpieza; el historial y las etiquetas permanecen en Git.
-
-Los cambios de cierre no agregan migraciones ni sustituyen D1. El hosting mantiene las versiones guardadas previas. Si necesitás regresar, seleccioná una versión anterior verificada en Sites y volvé a comprobar su flujo; no borres la base ni sobrescribas el historial Git.
+Sites conserva versiones D1 publicadas antes de la integración. Git mantiene el historial de la rama `tp/cierre-integracion` y las etiquetas de respaldo. Volver a una versión previa no importa ni transforma datos entre bases. No borres ninguna base para cambiar de versión.

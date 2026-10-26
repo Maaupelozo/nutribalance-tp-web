@@ -1,5 +1,11 @@
 # Modelo de datos
 
+El flujo principal utiliza UUID y recursos de la API Express. Una solicitud tiene `patientId: null` hasta que el profesional busca o crea una ficha y la vincula al confirmar. Una consulta pertenece a un paciente y puede vincularse a un turno. Consultá [el contrato de recursos](api-externa/contrato-api-frontend.md) y [la integración](integracion-api.md).
+
+El equipo del backend especifica PostgreSQL. Sus migraciones y esquema físico no están en este repositorio y no se inspeccionaron durante esta integración. El diagrama que sigue documenta exclusivamente el respaldo D1 anterior; no describe PostgreSQL.
+
+## Respaldo D1
+
 D1 utiliza SQLite. El esquema se declara en `db/schema.ts` y se crea con la migración SQL versionada en `drizzle/`.
 
 ```mermaid
