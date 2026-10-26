@@ -50,7 +50,7 @@ export default function RequestForm(){
     </fieldset>
     <fieldset disabled={busy}><legend>Elegí tu próximo encuentro</legend><p className="field-section-note">Consultas de 30 minutos. Todos los horarios son de Argentina.</p>
       <div className="form-grid"><label>Fecha *<input type="date" name="date" value={chosenDate} onChange={event=>setChosenDate(event.target.value)} min={today} max={addDays(today,60)} required {...errorProps('date')}/>{fieldError('date')}</label>
-        <label>Horario disponible *<select name="startsAt" value={chosenSlot} onChange={event=>setChosenSlot(event.target.value)} disabled={!chosenDate||loading||!slots.length} required {...errorProps('startsAt')}><option value="">{loading?'Buscando horarios…':'Elegí un horario'}</option>{slots.map(slot=><option key={slot.startsAt} value={slot.startsAt}>{localTime(slot.startsAt)}</option>)}</select>{fieldError('startsAt')}</label></div>
+        <label>Horario disponible *<select name="startsAt" value={chosenSlot} onChange={event=>setChosenSlot(event.target.value)} required {...errorProps('startsAt')}><option value="">{loading?'Buscando horarios…':'Elegí un horario'}</option>{slots.map(slot=><option key={slot.startsAt} value={slot.startsAt}>{localTime(slot.startsAt)}</option>)}</select>{fieldError('startsAt')}</label></div>
       {chosenDate&&!loading&&!slotError&&!slots.length&&<p role="status">No hay horarios disponibles para esa fecha. Probá con otro día.</p>}
       {slotError&&<div className="form-error" role="alert">{slotError} <button className="textbutton" type="button" onClick={()=>setRefresh(value=>value+1)}>Volver a buscar</button></div>}
     </fieldset>
@@ -58,6 +58,6 @@ export default function RequestForm(){
     {chosenDate&&chosenSlot&&<div className="request-summary" aria-live="polite"><strong>{dateText(chosenDate)} · {localTime(chosenSlot)}</strong><p>Tu solicitud queda pendiente de confirmación.</p></div>}
     <label className="checkbox request-consent"><input disabled={busy} name="fictional" type="checkbox" required {...errorProps('fictional')}/><span>Confirmo que los datos ingresados son ficticios. *{fieldError('fictional')}</span></label>
     {error&&<div ref={errorRef} tabIndex={-1} className="form-error" role="alert">{error}</div>}
-    <button className="btn request-submit" type="submit" disabled={busy||loading||!chosenSlot}>{busy?'Registrando solicitud…':'Enviar solicitud'}<ArrowUpRight size={18}/></button>
+    <button className="btn request-submit" type="submit" disabled={busy}>{busy?'Registrando solicitud…':'Enviar solicitud'}<ArrowUpRight size={18}/></button>
   </form>;
 }
