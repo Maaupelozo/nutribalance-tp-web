@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+const source=await readFile(new URL('../lib/validation.ts',import.meta.url),'utf8');
+const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText;
+const v=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const request={name:'Paciente Ficticio',email:'persona@example.com',phone:'000000000',date:'2026-11-03',time:'10:30',notes:'Prueba',fictional:true,requestKey:'12345678-1234-1234-1234-123456789012'};
+test('rechaza fechas que no existen y acepta un año bisiesto',()=>{assert.throws(()=>v.date('2026-02-30'));assert.equal(v.date('2024-02-29'),'2024-02-29')});
+test('una solicitud queda pendiente de confirmación y exige datos ficticios',()=>{assert.equal(v.publicRequestInput(request,'2026-10-26').start,630);assert.throws(()=>v.publicRequestInput({...request,fictional:false},'2026-10-26'))});
+test('rechaza solicitudes pasadas, sin correo y fuera de la franja de atención',()=>{assert.throws(()=>v.publicRequestInput({...request,date:'2026-01-01'},'2026-10-26'));assert.throws(()=>v.publicRequestInput({...request,email:'correo-invalido'},'2026-10-26'));assert.throws(()=>v.publicRequestInput({...request,time:'23:00'},'2026-10-26'))});
+test('permite turnos contiguos pero detecta solapamientos y turnos contenidos',()=>{assert.equal(v.intervalsOverlap(600,45,645,45),false);assert.equal(v.intervalsOverlap(600,45,630,45),true);assert.equal(v.intervalsOverlap(600,60,615,15),true)});
+test('distingue confirmación de asistencia y valida los estados',()=>{const a={id:1,patient:2,date:'2026-11-03',time:'10:30',duration:45,type:'Control',mode:'Presencial',status:'Programado',confirmed:true};assert.equal(v.appointmentInput(a).status,'confirmado');assert.equal(v.appointmentInput({...a,status:'Atendido'}).status,'atendido');assert.equal(v.appointmentInput({...a,confirmed:false}).status,'pendiente');assert.throws(()=>v.appointmentInput({...a,status:'inventado'}))});
+test('una consulta requiere motivo, observaciones, objetivos e indicaciones',()=>{const c={id:1,patient:1,date:'2026-11-03',reason:'Control',notes:'Evolución ficticia',goal:'Organizar comidas',indications:'Indicaciones ficticias',weight:70,height:170,fat:20,muscle:40,waist:80,hip:95};assert.equal(v.visitInput(c).reason,'Control');assert.throws(()=>v.visitInput({...c,indications:''}));assert.throws(()=>v.visitInput({...c,height:0}))});
+test('limita tamaño, identificadores y DNI, sin evaluar textos como HTML o SQL',()=>{assert.throws(()=>v.text('x'.repeat(101),'Nombre',100));assert.throws(()=>v.id(-1));assert.throws(()=>v.patientInput({id:1,name:'Ficticio',age:25,dni:'abc'}));assert.equal(v.text("O'Connor <script>",'Texto'),"O'Connor <script>")});

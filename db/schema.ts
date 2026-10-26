@@ -1,4 +1,15 @@
-// Intentionally empty by default.
-// Add Drizzle tables here when the site actually needs a database.
-// See examples/d1/db/schema.ts for an opt-in example.
-export {};
+import {sql} from 'drizzle-orm';
+import {sqliteTable,integer,text,real,index,uniqueIndex,check} from 'drizzle-orm/sqlite-core';
+export const patients=sqliteTable('patients',{
+ id:integer('id').primaryKey({autoIncrement:true}),name:text('name').notNull(),age:integer('age').notNull().default(0),dni:text('dni').notNull().default(''),email:text('email').notNull().default(''),phone:text('phone').notNull().default(''),goal:text('goal').notNull().default('Primera consulta'),os:text('insurance').notNull().default('Particular'),active:integer('active',{mode:'boolean'}).notNull().default(true),allergies:text('allergies').notNull().default(''),notes:text('notes').notNull().default(''),createdAt:text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),updatedAt:text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`)
+},t=>[uniqueIndex('patients_dni_unique').on(t.dni).where(sql`${t.dni} <> ''`),check('patient_age_valid',sql`${t.age} BETWEEN 0 AND 120`)]);
+export const appointments=sqliteTable('appointments',{
+ id:integer('id').primaryKey({autoIncrement:true}),patientId:integer('patient_id').notNull().references(()=>patients.id,{onDelete:'restrict'}),date:text('date').notNull(),startMinutes:integer('start_minutes').notNull(),duration:integer('duration').notNull().default(45),type:text('type').notNull().default('Primera consulta'),mode:text('mode').notNull().default('Presencial'),status:text('status').notNull().default('pendiente'),source:text('source').notNull().default('professional'),requestKey:text('request_key'),requestCode:text('request_code'),requestNotes:text('request_notes').notNull().default(''),createdAt:text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`)
+},t=>[index('appointments_date_idx').on(t.date,t.startMinutes),uniqueIndex('request_key_unique').on(t.requestKey),check('appointment_status_valid',sql`${t.status} IN ('pendiente','confirmado','atendido','cancelado','ausente')`),check('appointment_time_valid',sql`${t.startMinutes} >= 0 AND ${t.duration} BETWEEN 15 AND 240 AND ${t.startMinutes}+${t.duration} <= 1440`)]);
+export const consultations=sqliteTable('consultations',{
+ id:integer('id').primaryKey({autoIncrement:true}),patientId:integer('patient_id').notNull().references(()=>patients.id,{onDelete:'restrict'}),appointmentId:integer('appointment_id').references(()=>appointments.id,{onDelete:'restrict'}),date:text('date').notNull(),reason:text('reason').notNull(),notes:text('notes').notNull(),goal:text('goal').notNull(),indications:text('indications').notNull(),weight:real('weight').notNull(),height:real('height').notNull(),fat:real('fat').notNull().default(0),muscle:real('muscle').notNull().default(0),waist:real('waist').notNull().default(0),hip:real('hip').notNull().default(0),custom:text('custom_json').notNull().default('{}'),draft:integer('draft',{mode:'boolean'}).notNull().default(false),createdBy:text('created_by').notNull(),createdAt:text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`)
+},t=>[index('consultations_patient_date_idx').on(t.patientId,t.date),check('consultation_measurements_valid',sql`${t.weight} > 0 AND ${t.height} > 0`)]);
+export const blocks=sqliteTable('schedule_blocks',{
+ id:integer('id').primaryKey({autoIncrement:true}),date:text('date').notNull(),startMinutes:integer('start_minutes').notNull(),duration:integer('duration').notNull(),reason:text('reason').notNull()
+},t=>[check('block_time_valid',sql`${t.startMinutes} >= 0 AND ${t.duration} BETWEEN 15 AND 1440 AND ${t.startMinutes}+${t.duration} <= 1440`)]);
+export const state=sqliteTable('app_state',{id:integer('id').primaryKey(),revision:integer('revision').notNull().default(0)},t=>[check('revision_nonnegative',sql`${t.revision} >= 0`)]);

@@ -1,0 +1,2 @@
+import type {ReactNode} from 'react';
+export default function Stat({icon,label,value,detail,amber=false}:{icon:ReactNode;label:string;value:string;detail:string;amber?:boolean}){return <article className="stat"><div className="stat-top"><span>{label}</span><span className={amber?'stat-icon amber':'stat-icon'}>{icon}</span></div><strong>{value}</strong><small><span className={amber?'dot amber':'dot'}/>{detail}</small></article>}

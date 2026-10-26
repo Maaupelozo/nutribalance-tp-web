@@ -1,126 +1,126 @@
-# vinext-starter
+# NutriBalance · TP Integrador de Desarrollo Web 2026
 
-A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
+MVP del **escenario 2: NutriTurnos**, adaptado al proyecto NutriBalance. Permite presentar el servicio, solicitar un turno, revisarlo desde el panel profesional y registrar una consulta en el historial del paciente.
 
-## Prerequisites
+**Solo datos ficticios.** Esta aplicación es una entrega académica, no un sistema clínico listo para uso real.
 
-- Node.js `>=22.13.0`
-- Portable: Windows, macOS, or Linux; no Bash required
-- Managed Linux: managed Linux runtime with Bash, `flock`, `curl`, `sha256sum`, and GNU `timeout`
-- Git is required only for publishing
+## Flujo principal
 
-## Sites Lifecycle
+1. Visitar `/` y abrir `/solicitar-turno`.
+2. Enviar nombre, correo, teléfono, fecha y hora preferidos. La solicitud se guarda en D1 con estado pendiente.
+3. Acceder a `/ingresar` con una cuenta profesional autorizada.
+4. Abrir `/panel`, actualizar los datos y revisar el turno en la agenda o ficha del paciente.
+5. Confirmar o reprogramar. Los turnos confirmados no pueden superponerse entre sí ni con un bloqueo.
+6. Abrir el turno, seleccionar **Registrar consulta** y completar motivo, medidas, observaciones, objetivos y plan/indicaciones.
+7. Guardar. La consulta se incorpora al historial y el turno asociado pasa a atendido. Recargar para comprobar persistencia.
 
-The Sites initializer copies the shared starter and selects managed-linux only when `SITES_MANAGED_LINUX_CONTAINER=1`; otherwise it selects portable. It saves the selection only in ignored `.sites-runtime/execution-profile.json`. Both profiles copy/configure first, then use the plugin's separate `install-dependencies.mjs` step to measure installation independently. Edit source under `app/` and follow the Sites skill for installation, preview, builds, and publishing.
+La solicitud pública no expone huecos de agenda ni confirma automáticamente una reserva. La profesional conserva el control del horario definitivo.
 
-Run `node <plugin-root>/scripts/configure-execution-profile.mjs` only when the profile is unknown for the current checkout and environment. Profile changes do not alter tracked source or require reinstalling otherwise-valid dependencies; restart an existing preview to use the new selection. Do not commit or upload `.sites-runtime/`.
+## Stack y justificación
 
-This starter does not use `wrangler.jsonc`.
+- **React + TypeScript:** frontend existente y tipos compartidos entre formularios, cliente HTTP y servidor.
+- **CSS propio:** identidad verde/crema, escritorio y móvil, foco visible y reducción de movimiento.
+- **Vinext/Vite:** renderizado de páginas públicas y rutas HTTP en un mismo proyecto. Conserva la integración de hosting del proyecto original.
+- **Cloudflare Workers:** backend mínimo; dos endpoints para el flujo principal.
+- **D1 (SQLite) + Drizzle:** relaciones entre pacientes, turnos y consultas; migraciones SQL versionadas. No se usa `localStorage` como reemplazo de la base de datos del flujo obligatorio.
+- **Autenticación de la plataforma:** inicio de sesión con ChatGPT y lista de cuentas autorizadas en el servidor. No se inventa un login de contraseña en el navegador.
 
-`install:ci` runs `npm ci` once against the shared lockfile, disables parent-workspace discovery, and includes required dev/optional dependencies despite production/omit settings. Sharp defaults to prebuilt binaries unless explicitly configured otherwise. Do not overlap installers.
+No se introduce Django/Express como un segundo servidor porque el TP prioriza UI/UX y el flujo necesita pocas operaciones.
 
-- **Portable:** Preserve host HOME, npm cache, registry, proxy, temporary paths, retry/concurrency settings, and lifecycle-script policy. Use `--prefer-offline --no-audit --no-fund`.
-- **Managed Linux:** Use the existing project-local HOME/cache/tmp setup and Linux install lock, tarball preflight, and timeout. Restore the image-seeded npm cache only when its lockfile hash matches; retain network fallback. Builds keep their existing timeout. These helpers are not invoked by the portable profile.
+## Rutas
 
-`scripts/sites-env.mjs` preserves the caller's HOME, npm cache, proxy, XDG, and temporary-directory configuration while defaulting Wrangler and Miniflare state to the checkout. If npm reports an unwritable cache, select a writable path with `npm_config_cache` for that install. The `dev` and `start` scripts also keep Wrangler logs inside the checkout. Generated `.sites-runtime/` and `.wrangler/` directories are disposable and ignored by Git.
+| Ruta | Finalidad | Acceso |
+|---|---|---|
+| `/` | Presentación del servicio, CTA y preguntas frecuentes | Compatible con visitantes anónimos |
+| `/solicitar-turno` | Formulario y comprobante de solicitud | Compatible con visitantes anónimos |
+| `/ingresar` | Inicio de sesión profesional | Identidad de plataforma |
+| `/panel` | Agenda, pacientes e historial | Cuenta autorizada, comprobación en servidor |
+| `/demo-paciente` | Complemento visual con datos ficticios locales | Demostración, no acceso a la BD clínica |
+| `/demo-profesional` | Prototipo visual anterior para revisión de UI | Demostración, no acceso a la BD clínica |
+| `/api/solicitudes` | POST de solicitud pública | Datos mínimos; no permite consultar historiales |
+| `/api/panel` | GET de datos y POST de cambios | Identidad + permiso profesional |
+| `/robots.txt`, `/sitemap.xml` | SEO de las páginas públicas | Sin información clínica |
 
-On portable, `npm run dev` uses `vinext dev` with HMR, starting at port 5173. Vinext records the running server in ignored `.vinext/` state, rejects an ordinary duplicate launch, and recovers stale state after a stopped process; exactly simultaneous starts can race. Pass `--port <port>` or `--hostname <host>` after `npm run dev --` when needed; keep portable previews on loopback.
+**Visibilidad del hosting:** se conserva la configuración privada del sitio original hasta que el propietario solicite abrirlo para la defensa. La página pública de la aplicación y el permiso global de hosting son capas diferentes. Hay que habilitar acceso público antes de presentar el requisito de URL pública como cumplido.
 
-For browser QA on managed Linux, use `sites-preview start`. The project's dev script runs Vite and accepts the supervisor's `--host 0.0.0.0 --port 4173 --strictPort` arguments. The internal browser uses `http://terminal.local:4173/`; it is not a user-facing URL. The supervisor owns the preview lifecycle. The ignored local profile survives the supervisor's cleared process environment.
+## Estructura
 
-The portable profile simulates ChatGPT sign-in only for loopback development requests. Visit `/signin-with-chatgpt?return_to=/` to sign in as `local_seedy` (`seedy@sites.test`, display name `Seedy`) and `/signout-with-chatgpt?return_to=/` to sign out. The development cookie preserves that identity across server restarts. Mock auth is disabled in the managed-linux profile and is not included in production builds; hosted authentication remains dispatch-owned.
-
-The Worker uses `vinext/server/fetch-handler`, including Vinext's config-aware image handling. After building, `npm start` runs that Worker locally through Wrangler on `127.0.0.1`, sharing `.wrangler/state` with dev preview and local D1 migrations; it does not deploy the site or simulate sign-in. Use the URL printed by the server. Pass `npm start -- --port <port>` to select a different built-preview port.
-
-Local previews use Miniflare's placeholder `Request.cf` metadata without a network lookup. Set `CLOUDFLARE_CF_FETCH_ENABLED=true` to opt into fetching preview metadata; this setting does not change hosted request metadata.
-
-Local tool usage metrics are disabled by default. Set `WRANGLER_SEND_METRICS=true` to opt in.
-
-## Included Shape
-
-- edit site code under `app/`
-- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
-- `db/schema.ts` starts intentionally empty
-- `@cloudflare/workers-types` provides Worker types; `cloudflare-env.d.ts` declares optional `DB`/`BUCKET` bindings—update these declarations if binding names change
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Use it as the durable user key; use email and name for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive `oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty `name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by `oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```text
+app/page.tsx                  Página pública renderizada en servidor
+app/solicitar-turno/           Solicitud de turno
+app/ingresar/                 Acceso profesional
+app/panel/                    Página protegida y dashboard
+app/api/                      Backend mínimo
+components/public/            Cabecera y formulario público
+lib/types.ts                  Tipos del dominio
+lib/api-client.ts             Cliente HTTP y detección de cambios
+lib/validation.ts             Validaciones puras
+lib/server/                   Autorización y repositorio SQL
+lib/demo-data.ts              Ejemplos ficticios de los prototipos
+app/globals.css               Sistema visual y responsive
+db/schema.ts                  Esquema Drizzle
+drizzle/                      Migraciones SQL y metadatos
+tests/                        Validación del dominio, BD y Worker
+docs/                         Análisis, modelo de datos y defensa
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+## Ejecución local
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use the returned `userId` as the stable user key for user-owned records; do not use email as a durable identifier.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send anonymous visitors through Sign in with ChatGPT.
-- In a Server Component, start sign-in with `<a href={chatGPTSignInPath(returnTo)} target="_top">`. The auth helper module is server-only; do not import it into a Client Component.
-- Do not use `fetch`, XHR, a client-side router, or a framework link that can prefetch the sign-in route. SIWC must start as a top-level navigation.
-- Never request the AuthAPI authorization endpoint directly. The dispatch-owned `/signin-with-chatgpt` route must start the SIWC flow.
-- Use `chatGPTSignOutPath(returnTo)` for browser sign-out links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the OAuth cookies, and identity header injection. Do not implement app routes for those reserved paths. Routes that do not import and call the helper remain anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the Sites hosting platform's access policy controls for workspace-wide restrictions, or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Local D1 migrations
-
-For a D1-backed local preview, generate SQL with `npm run db:generate`. Build once through the Sites skill's build entrypoint (or `npm run build` for standalone use) to generate `dist/server/wrangler.json`, rebuilding if bindings change. From the project root, apply each pending migration in order:
+Requisitos: Node.js 22.13 o superior, pnpm y Python 3 (solo para pruebas SQL). Instalar las versiones bloqueadas por `pnpm-lock.yaml`:
 
 ```sh
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_example.sql
+pnpm install --frozen-lockfile
 ```
 
-Replace the filename with the pending migration and `DB` with your D1 binding name if different. Use `.wrangler/state`, not `.wrangler/state/v3`; Wrangler adds the versioned directories. Do not replay migrations already applied locally. This updates only the preview database; publishing applies production migrations separately.
+Copiar `.env.example` a `.dev.vars` y completar `PROFESSIONAL_EMAILS` únicamente en ese archivo ignorado. No subir cuentas autorizadas ni secretos al repositorio.
 
-## Diagnostic Commands
+Una descarga o clon limpio usa automáticamente el perfil portable en Windows/macOS/Linux. En ese perfil, la autenticación simulada es `seedy@sites.test`, exclusiva de loopback; agregarla a la configuración **local** para probar el panel. La identidad simulada no debe habilitarse ni autorizarse en producción.
 
-- `npm run install:ci`: perform the one locked dependency install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build the deployable Sites artifact
-- `npm run start`: preview the built Worker locally with D1/R2 support
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+Construir una vez para obtener la configuración de D1:
 
-When using the Sites plugin, follow its skill instructions for installation, builds, and publishing. These npm commands remain available for standalone use.
+```sh
+pnpm build
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_chubby_blue_marvel.sql
+pnpm dev
+```
 
-The portable build runs Vinext directly without a host `timeout` command. The managed-linux build uses `scripts/build-verified.sh` and its existing `SITES_BUILD_TIMEOUT` setting.
+Aplicar la migración solo una vez por base local. Si se agregan migraciones, ejecutarlas en orden. Los datos de desarrollo y producción son independientes. Para publicar se utiliza el flujo de Sites, que aplica las migraciones de producción.
 
-## Learn More
+## Variables de servidor
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- `PROFESSIONAL_EMAILS`: lista de correos profesionales autorizados, separados por comas. Se configura como secreto de entorno del hosting; el frontend no recibe la lista.
+- `DB`: binding D1, declarado en `.openai/hosting.json` y provisionado por el hosting.
+
+La sesión de ChatGPT demuestra identidad; el servidor valida además la pertenencia a la lista profesional. Un usuario autenticado cualquiera no obtiene acceso al panel.
+
+## Verificación
+
+```sh
+pnpm exec tsc --noEmit
+node --test tests/domain.test.mjs
+python3 tests/database_test.py
+pnpm build
+node tests/worker-flow.mjs
+```
+
+La prueba del Worker usa el build real con una base D1 aislada en Miniflare; no modifica producción. Verifica 401/403, solicitud, prevención de duplicados, confirmación, control de versión, consulta y recarga.
+
+## Alcance y límites
+
+- Persistencia del MVP: pacientes (incluidos datos de contacto), agenda, bloqueos y consultas.
+- Consultas finalizadas: no se sobrescriben; los registros anteriores se conservan.
+- Solicitudes públicas: idempotentes por identificador; repetir el mismo envío no crea otro turno.
+- Cambios simultáneos: control de revisión para evitar sobrescribir una modificación de otra sesión. Ante conflicto, actualizar datos y reintentar.
+- Complementos heredados: pagos, archivos, diario, token, objetivos adicionales y configuración visual no integran el flujo persistente obligatorio. No presentarlos como almacenamiento clínico de servidor.
+- No hay recordatorios automáticos, facturación, firma electrónica, IA clínica ni receta digital.
+- No se cargan automáticamente datos del prototipo local a la base de producción.
+
+## Entrega y defensa
+
+Ver [análisis funcional](docs/analisis-funcional.md), [modelo de datos](docs/modelo-datos.md), [guía de defensa](docs/defensa.md) y [verificación](docs/verificacion.md).
+
+Pendientes del equipo: publicar este código en su repositorio GitHub, identificar los integrantes y sus contribuciones reales, adjuntar el enlace/capturas del prototipo, autorizar la URL pública y completar la medición Lighthouse/PageSpeed y la revisión final en un celular.
+
+## Uso de IA
+
+Se utilizó IA como apoyo para prototipado, generación de código, revisión y documentación. El equipo debe revisar lo incorporado y poder explicar los componentes, las validaciones, la autorización, el modelo relacional, las transacciones y el despliegue. No atribuir al equipo pruebas, entrevistas o decisiones que no haya realizado o validado.
