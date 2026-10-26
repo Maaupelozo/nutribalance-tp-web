@@ -1,0 +1,1 @@
+export default function Wordmark(){return <a className="wordmark" href="/" aria-label="NutriBalance, Mauricio Pelozo, inicio"><span>nutri<em>balance</em><span className="wordmark-point">.</span></span><small>Mauricio Pelozo</small></a>}

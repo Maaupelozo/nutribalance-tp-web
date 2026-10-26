@@ -21,7 +21,7 @@ La solicitud pública no expone huecos de agenda ni confirma automáticamente un
 ## Stack y justificación
 
 - **React + TypeScript:** frontend existente y tipos compartidos entre formularios, cliente HTTP y servidor.
-- **CSS propio:** identidad verde/crema, escritorio y móvil, foco visible y reducción de movimiento.
+- **CSS propio:** dirección editorial con verde bosque/marfil, títulos Source Serif 4, interfaz Manrope y fuentes WOFF2 locales. Tokens compartidos, foco visible y movimiento reducido.
 - **Vinext/Vite:** renderizado de páginas públicas y rutas HTTP en un mismo proyecto. Conserva la integración de hosting del proyecto original.
 - **Cloudflare Workers:** backend mínimo; dos endpoints para el flujo principal.
 - **D1 (SQLite) + Drizzle:** relaciones entre pacientes, turnos y consultas; migraciones SQL versionadas. No se usa `localStorage` como reemplazo de la base de datos del flujo obligatorio.
@@ -59,7 +59,8 @@ lib/api-client.ts             Cliente HTTP y detección de cambios
 lib/validation.ts             Validaciones puras
 lib/server/                   Autorización y repositorio SQL
 lib/demo-data.ts              Ejemplos ficticios de los prototipos
-app/globals.css               Sistema visual y responsive
+app/globals.css               Entrada de estilos
+app/styles/                   Tokens, bases, páginas públicas y panel
 db/schema.ts                  Esquema Drizzle
 drizzle/                      Migraciones SQL y metadatos
 tests/                        Validación del dominio, BD y Worker
@@ -124,6 +125,8 @@ En Windows, `install:ci` heredado requiere Bash; podés instalar con `pnpm insta
 - No se cargan automáticamente datos del prototipo local a la base de producción.
 
 ## Entrega y defensa
+
+El [rediseño editorial](docs/rediseno-editorial.md) explica la nueva identidad, composición, formulario y prioridades del panel. Los estilos heredados se conservan en una capa de compatibilidad. La revisión visual en navegador y móvil sigue pendiente: el entorno no dispone de navegador automatizable.
 
 Ver [análisis funcional](docs/analisis-funcional.md), [modelo de datos](docs/modelo-datos.md), [guía de defensa](docs/defensa.md), [verificación](docs/verificacion.md) y [estado de entrega](docs/estado-entrega.md).
 

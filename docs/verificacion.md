@@ -80,3 +80,9 @@ La instalación inicial venció durante descargas y se reanudó con la caché y 
 La versión 5 publicada corresponde al commit `2d0975844547139237fcc6b49c0ac2da6fc3a632`. Una petición real a `/api/solicitudes` devuelve 201 y el código `NT-F4C738E4CD`, para el 28 de octubre de 2026 a las 15:00 Argentina. El reenvío con la misma clave y otra hora devuelve el mismo comprobante. La lectura independiente de D1 encuentra un paciente ficticio y un turno pendiente con ese código; ninguna consulta ni duplicados. Esto acredita solicitud y persistencia de producción, no el recorrido profesional completo.
 
 El propietario autorizó el acceso público. Después del cambio se comprobó el inicio sin credenciales (200) y la API del panel anónima (401, `Cache-Control: no-store`). El acceso público al sitio no concede identidad ni permisos profesionales.
+
+## Rediseño editorial posterior
+
+El propietario aprobó aplicar la propuesta de identidad, tipografía, composición, formulario y panel. TypeScript, diez pruebas de dominio/cliente HTTP, el build y el Worker con D1 aislada aprobaron sobre el rediseño. La prueba del Worker comprueba también la identidad de Mauricio, las secciones públicas, los metadatos y los grupos semánticos del formulario.
+
+Una revisión independiente de código verificó la dirección y los vínculos de consulta. Sus dos ajustes se aplicaron y se revisaron: el menú móvil cerrado no recibe foco y el botón anuncia su estado; la fecha pasó a información de apoyo debajo del H1. El veredicto se limita a esas correcciones y al código. Sin navegador ni nuevas capturas, no acredita composición renderizada, interacción de teclado ni responsive visual.

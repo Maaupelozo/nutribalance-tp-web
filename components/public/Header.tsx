@@ -1,2 +1,3 @@
-import {Leaf,ArrowUpRight} from 'lucide-react';
-export default function PublicHeader(){return <><a className="skip-link" href="#contenido">Saltar al contenido principal</a><header className="public-header"><a className="brand" href="/" aria-label="NutriBalance, inicio"><span className="brandmark"><Leaf size={22}/></span>nutri<span>balance</span></a><nav aria-label="Navegación principal"><a href="/#acompanamiento">El acompañamiento</a><a href="/#como-funciona">Cómo funciona</a><a href="/ingresar">Acceso profesional</a><a className="btn" href="/solicitar-turno">Solicitar turno <ArrowUpRight size={16}/></a></nav></header></>}
+import {ArrowUpRight} from 'lucide-react';
+import Wordmark from './Wordmark';
+export default function PublicHeader(){return <><a className="skip-link" href="#contenido">Saltar al contenido principal</a><header className="public-header"><Wordmark/><nav aria-label="Navegación principal"><a href="/#el-enfoque">El enfoque</a><a href="/#la-consulta">La consulta</a><a href="/ingresar" className="professional-access">Mi consultorio</a><a className="btn" href="/solicitar-turno">Solicitar turno <ArrowUpRight size={16}/></a></nav></header></>}
