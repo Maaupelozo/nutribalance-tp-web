@@ -27,7 +27,7 @@ La solicitud pública no expone huecos de agenda ni confirma automáticamente un
 - **D1 (SQLite) + Drizzle:** relaciones entre pacientes, turnos y consultas; migraciones SQL versionadas. No se usa `localStorage` como reemplazo de la base de datos del flujo obligatorio.
 - **Autenticación de la plataforma:** inicio de sesión con ChatGPT y lista de cuentas autorizadas en el servidor. No se inventa un login de contraseña en el navegador.
 
-No se introduce Django/Express como un segundo servidor porque el TP prioriza UI/UX y el flujo necesita pocas operaciones.
+El flujo comprobable utiliza D1. La integración Express del compañero se conserva como evolución pendiente de un servidor operativo. Ver [comparación y plan de integración](docs/integracion-api.md), con el contrato recibido y los criterios para cambiar de backend.
 
 ## Rutas
 
@@ -99,19 +99,25 @@ La sesión de ChatGPT demuestra identidad; el servidor valida además la pertene
 
 ```sh
 pnpm exec tsc --noEmit
-node --test tests/domain.test.mjs
+pnpm test
 python3 tests/database_test.py
 pnpm build
-node tests/worker-flow.mjs
+node --import ./scripts/sites-env.mjs tests/worker-flow.mjs
 ```
 
 La prueba del Worker usa el build real con una base D1 aislada en Miniflare; no modifica producción. Verifica 401/403, solicitud, prevención de duplicados, confirmación, control de versión, consulta y recarga.
+
+En Windows, `install:ci` heredado requiere Bash; podés instalar con `pnpm install --frozen-lockfile` desde PowerShell. Usá pnpm 11.25.0 según `packageManager`. Si una descarga vence, repetí la instalación con `--fetch-timeout=180000 --network-concurrency=4`; conserva la caché y el lockfile. Para las pruebas SQL, usá el ejecutable Python 3 disponible en tu equipo.
 
 ## Alcance y límites
 
 - Persistencia del MVP: pacientes (incluidos datos de contacto), agenda, bloqueos y consultas.
 - Consultas finalizadas: no se sobrescriben; los registros anteriores se conservan.
 - Solicitudes públicas: idempotentes por identificador; repetir el mismo envío no crea otro turno.
+- Comprobante: fecha y hora provienen del registro guardado, también cuando un reintento trae preferencias distintas.
+- Consulta finalizada vinculada: el servidor guarda la consulta y marca el turno atendido en la misma transacción, aunque el cliente no envíe un cambio de estado separado.
+- Borradores: disponibles en el prototipo visual; el panel persistente ofrece consultas finalizadas porque no implementa reapertura/edición de borradores.
+- Sesión vencida durante un guardado: el formulario sigue abierto y permite ingresar en otra pestaña. Volvé al formulario para reenviar conscientemente; no hay reintento automático.
 - Cambios simultáneos: control de revisión para evitar sobrescribir una modificación de otra sesión. Ante conflicto, actualizar datos y reintentar.
 - Complementos heredados: pagos, archivos, diario, token, objetivos adicionales y configuración visual no integran el flujo persistente obligatorio. No presentarlos como almacenamiento clínico de servidor.
 - No hay recordatorios automáticos, facturación, firma electrónica, IA clínica ni receta digital.
@@ -119,7 +125,7 @@ La prueba del Worker usa el build real con una base D1 aislada en Miniflare; no 
 
 ## Entrega y defensa
 
-Ver [análisis funcional](docs/analisis-funcional.md), [modelo de datos](docs/modelo-datos.md), [guía de defensa](docs/defensa.md) y [verificación](docs/verificacion.md).
+Ver [análisis funcional](docs/analisis-funcional.md), [modelo de datos](docs/modelo-datos.md), [guía de defensa](docs/defensa.md), [verificación](docs/verificacion.md) y [estado de entrega](docs/estado-entrega.md).
 
 Pendientes del equipo: publicar este código en su repositorio GitHub, identificar los integrantes y sus contribuciones reales, adjuntar el enlace/capturas del prototipo, autorizar la URL pública y completar la medición Lighthouse/PageSpeed y la revisión final en un celular.
 

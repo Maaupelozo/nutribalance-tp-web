@@ -29,7 +29,9 @@ La ejecución de cada prueba debe verificarse antes de presentar su resultado co
 
 La URL del sitio, la audiencia de hosting y la autorización del panel son tres cuestiones distintas. Un sitio publicado con audiencia privada todavía no acredita el requisito de URL pública del TP.
 
-## Resultados observados en esta iteración
+## Evidencia previa conservada
+
+Estos resultados proceden de la iteración anterior. No equivalen a una nueva ejecución en este equipo:
 
 - 7 pruebas de dominio aprobadas.
 - 7 pruebas de integridad SQL aprobadas.
@@ -47,3 +49,28 @@ La URL del sitio, la audiencia de hosting y la autorización del panel son tres 
 ![Página pública de NutriBalance en escritorio](evidencias/inicio-escritorio.jpg)
 
 Captura del preview revisado. El endpoint y la BD se verificaron aparte con las pruebas de integración.
+
+## Verificación del 26 de octubre de 2026
+
+La revisión parte del commit `8d56c797ab281f2858ba8982a36f0cce6e18a111`. Se ejecutaron estos controles sobre los cambios de cierre:
+
+| Control | Resultado |
+|---|---|
+| TypeScript (`pnpm exec tsc --noEmit`) | Aprobado |
+| Dominio y cliente HTTP (`pnpm test`) | 10 pruebas aprobadas |
+| Migración en SQLite (`python3 tests/database_test.py`) | 7 pruebas aprobadas |
+| Build de producción | Aprobado con Vinext/Vite en Windows |
+| Worker compilado + D1 aislada | Aprobado: permisos, solicitud, idempotencia, confirmación, revisión, consulta, atendido y recarga |
+| Reintento con otra hora en el formulario | Devuelve la hora original guardada, sin crear otro paciente/turno |
+| Consulta sin comando separado de asistencia | El servidor cambia el turno a atendido |
+| Consulta inválida | No agrega registros ni cambia la revisión |
+| Conflicto de revisión | HTTP 409 y `Cache-Control: no-store` |
+| Sesión vencida | Pruebas del cliente preservan 401 y verifican un solo envío, sin reintento automático |
+| API Express externa | Bloqueada: HTTP 530, Cloudflare 1033 en CSRF y disponibilidad |
+| D1 desplegada | Tablas presentes; pacientes, turnos y consultas vacíos al inspeccionarlos |
+| Navegador y responsive de esta iteración | Sin verificar: el inventario de navegadores de automatización está vacío |
+| Lighthouse/PageSpeed | Pendiente; no se atribuye una puntuación |
+
+Las pruebas de Worker ejecutan SQL real en D1 local aislada. No constituyen una prueba de producción ni de PostgreSQL. La cuenta de preview y `.dev.vars` son ficticias, locales e ignoradas por Git.
+
+La instalación inicial venció durante descargas y se reanudó con la caché y un tiempo de espera mayor, sin cambiar las versiones del lockfile. En este equipo el runner de Node y el build necesitaron ejecución fuera de la restricción que impedía crear procesos; los primeros fallos de `spawn EPERM` no fueron fallos de las reglas de negocio.

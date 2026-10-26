@@ -1,0 +1,2023 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "NutriTurnos - Contrato API académico",
+    "version": "1.0.0",
+    "description": "Contrato previo a implementación. Monolito modular Express + TypeScript. Una profesional, datos ficticios. Base /api/v1. JSON UTF-8; rechazar propiedades desconocidas. Sesión cookie HttpOnly de duración absoluta 12 h; CSRF en todas las mutaciones, también login y solicitud pública. No hay registro público ni portal de paciente."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Desarrollo propuesto; backend todavía no implementado."
+    },
+    {
+      "url": "/api/v1",
+      "description": "Producción con proxy del mismo origen."
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Patients"
+    },
+    {
+      "name": "Appointments"
+    },
+    {
+      "name": "Consultations"
+    }
+  ],
+  "security": [
+    {
+      "sessionCookie": []
+    }
+  ],
+  "paths": {
+    "/auth/csrf": {
+      "get": {
+        "operationId": "getCsrf",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Obtener protección CSRF",
+        "description": "Crea sesión anónima si falta. Cache-Control: no-store. No exige login.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Csrf"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Iniciar sesión profesional",
+        "description": "Regenera el identificador de sesión y el token CSRF. Credenciales inválidas: 401 INVALID_CREDENTIALS. Nunca retorna password ni hash.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginInput"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32
+            },
+            "description": "Obtener de GET /auth/csrf; login lo rota. Usar el token de la sesión actual."
+          }
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "getCurrentSession",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Consultar sesión profesional",
+        "description": "No renueva el vencimiento absoluto. Cache-Control: no-store.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Cerrar sesión",
+        "description": "Destruye la sesión del servidor y elimina la cookie.",
+        "responses": {
+          "204": {
+            "description": "Operación exitosa, sin cuerpo."
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32
+            },
+            "description": "Obtener de GET /auth/csrf; login lo rota. Usar el token de la sesión actual."
+          }
+        ]
+      }
+    },
+    "/patients": {
+      "get": {
+        "operationId": "listPatients",
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Listar y buscar pacientes",
+        "description": "Orden lastName ASC, firstName ASC, id ASC. Búsqueda vacía equivale a sin filtro.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientsPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": ""
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "description": ""
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "description": "Nombre, apellido o documento; coincidencia parcial sin distinguir mayúsculas."
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createPatient",
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Crear paciente",
+        "description": "Documento no nulo único: 409 PATIENT_DOCUMENT_EXISTS. Campos opcionales omitidos se almacenan como null.",
+        "responses": {
+          "201": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Patient"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientCreate"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32
+            },
+            "description": "Obtener de GET /auth/csrf; login lo rota. Usar el token de la sesión actual."
+          }
+        ]
+      }
+    },
+    "/patients/{patientId}": {
+      "get": {
+        "operationId": "getPatient",
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Obtener ficha del paciente",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Patient"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        },
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID del paciente."
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "updatePatient",
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Editar ficha del paciente",
+        "description": "PATCH parcial: ausente conserva el valor; null borra solo campos nullable. Documento duplicado: PATIENT_DOCUMENT_EXISTS. Cuerpo vacío inválido.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Patient"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientPatch"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID del paciente."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32
+            },
+            "description": "Obtener de GET /auth/csrf; login lo rota. Usar el token de la sesión actual."
+          }
+        ]
+      }
+    },
+    "/availability": {
+      "get": {
+        "operationId": "getAvailability",
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Consultar horarios disponibles",
+        "description": "Lunes a viernes, 09:00 a 17:00 Argentina, bloques fijos de 30 minutos. Último inicio 16:30. Fines de semana retornan slots []. Excluye inicios pasados y turnos pending/confirmed/attended. No expone pacientes.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Availability"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Fecha local de Argentina, desde hoy hasta 60 días inclusive."
+          }
+        ]
+      }
+    },
+    "/appointment-requests": {
+      "post": {
+        "operationId": "requestAppointment",
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Solicitar un turno público",
+        "description": "Crea pending sin crear paciente. Horario ocupado: 409 SLOT_UNAVAILABLE. startsAt debe corresponder a un slot publicado y futuro. No confirma asistencia ni expone datos clínicos.",
+        "responses": {
+          "201": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentReceipt"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32
+            },
+            "description": "Obtener de GET /auth/csrf; login lo rota. Usar el token de la sesión actual."
+          }
+        ]
+      }
+    },
+    "/appointments": {
+      "get": {
+        "operationId": "listAppointments",
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Consultar agenda profesional",
+        "description": "Orden startsAt ASC, id ASC. Convierte límites de fechas locales a UTC; incluye ambos días completos.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentsPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": ""
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "description": ""
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Primer día local incluido."
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Último día local incluido; rango máximo 31 días."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentStatus"
+            },
+            "description": ""
+          },
+          {
+            "name": "patientId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": ""
+          }
+        ]
+      }
+    },
+    "/appointments/{appointmentId}": {
+      "get": {
+        "operationId": "getAppointment",
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Consultar un turno",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        },
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID del turno."
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "updateAppointment",
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Gestionar estado y vincular paciente",
+        "description": "pending -> confirmed/cancelled; confirmed -> attended/cancelled. Repetir estado es idempotente. Confirmar requiere patientId existente. No se reasigna un paciente ya vinculado. Terminales sin cambios. No reprograma: cancelar y solicitar otro turno. Conflictos: INVALID_STATUS_TRANSITION, PATIENT_REQUIRED o APPOINTMENT_PATIENT_MISMATCH. No se permite incluir patientId al cancelar pending. Un mismo estado con otro patientId devuelve conflicto; mismo estado con el mismo patientId no modifica timestamps.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentPatch"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID del turno."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32
+            },
+            "description": "Obtener de GET /auth/csrf; login lo rota. Usar el token de la sesión actual."
+          }
+        ]
+      }
+    },
+    "/patients/{patientId}/consultations": {
+      "get": {
+        "operationId": "listConsultations",
+        "tags": [
+          "Consultations"
+        ],
+        "summary": "Consultar historia cronológica",
+        "description": "Orden date DESC, createdAt DESC, id DESC. Paciente sin consultas: data [], total 0, totalPages 0; paciente inexistente: 404.",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultationsPage"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        },
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID del paciente."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": ""
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "description": ""
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createConsultation",
+        "tags": [
+          "Consultations"
+        ],
+        "summary": "Registrar consulta clínica",
+        "description": "date no futura. Si appointmentId existe, debe estar confirmed, corresponder al paciente y no tener consulta previa. Inserción y cambio a attended en una transacción. Sin appointmentId no cambia turnos. Conflictos: INVALID_STATUS_TRANSITION, APPOINTMENT_PATIENT_MISMATCH, APPOINTMENT_ALREADY_LINKED. Con turno, date debe coincidir con su fecha local y startsAt no puede ser futuro al registrar. Fecha no coincidente o atención anticipada: 400. Duplicado de vínculo se verifica antes de estado. Medidas con máximo dos decimales.",
+        "responses": {
+          "201": {
+            "description": "Operación exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Consultation"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error500"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsultationCreate"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID del paciente."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32
+            },
+            "description": "Obtener de GET /auth/csrf; login lo rota. Usar el token de la sesión actual."
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "nutri.sid",
+        "description": "Cookie firmada; HttpOnly; Secure en producción; SameSite=Lax; Path=/; sin Domain. Usar credentials: include. Vencimiento absoluto 12 h."
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "nullable": false
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "professional"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "role"
+        ],
+        "example": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "email": "nutri@example.test",
+          "displayName": "Profesional de prueba",
+          "role": "professional"
+        }
+      },
+      "Csrf": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "csrfToken": {
+            "type": "string",
+            "minLength": 32
+          }
+        },
+        "required": [
+          "csrfToken"
+        ],
+        "example": {
+          "csrfToken": "csrf-ejemplo-no-es-un-token-real-000001"
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "example": {
+          "email": "nutri@example.test",
+          "password": "clave-ficticia-solo-para-mocks"
+        }
+      },
+      "Session": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "csrfToken": {
+            "type": "string",
+            "minLength": 32
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "user",
+          "csrfToken",
+          "expiresAt"
+        ],
+        "example": {
+          "user": {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "email": "nutri@example.test",
+            "displayName": "Profesional de prueba",
+            "role": "professional"
+          },
+          "csrfToken": "csrf-ejemplo-no-es-un-token-real-000002",
+          "expiresAt": "2026-10-17T00:00:00Z"
+        }
+      },
+      "PatientCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "documentNumber": {
+            "type": "string",
+            "pattern": "^[0-9]{7,9}$",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 30
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "nullable": true
+          },
+          "background": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "nullable": true
+          },
+          "allergies": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "medication": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "nullable": true
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "phone"
+        ],
+        "example": {
+          "firstName": "Ana",
+          "lastName": "Ejemplo",
+          "documentNumber": "99000001",
+          "birthDate": "1995-05-20",
+          "phone": "+5493624000000",
+          "email": "ana@example.test",
+          "background": "Antecedentes ficticios",
+          "allergies": null,
+          "medication": null
+        }
+      },
+      "PatientPatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "documentNumber": {
+            "type": "string",
+            "pattern": "^[0-9]{7,9}$",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 30
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "nullable": true
+          },
+          "background": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "nullable": true
+          },
+          "allergies": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "medication": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "nullable": true
+          }
+        },
+        "required": [],
+        "minProperties": 1,
+        "example": {
+          "phone": "+5493624000001",
+          "allergies": null
+        }
+      },
+      "Patient": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "documentNumber": {
+            "type": "string",
+            "pattern": "^[0-9]{7,9}$",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 30
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "nullable": true
+          },
+          "background": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "nullable": true
+          },
+          "allergies": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "medication": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "documentNumber",
+          "birthDate",
+          "phone",
+          "email",
+          "background",
+          "allergies",
+          "medication",
+          "createdAt",
+          "updatedAt"
+        ],
+        "example": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "firstName": "Ana",
+          "lastName": "Ejemplo",
+          "documentNumber": "99000001",
+          "birthDate": "1995-05-20",
+          "phone": "+5493624000000",
+          "email": "ana@example.test",
+          "background": "Antecedentes ficticios",
+          "allergies": null,
+          "medication": null,
+          "createdAt": "2026-10-16T12:00:00Z",
+          "updatedAt": "2026-10-16T12:00:00Z"
+        }
+      },
+      "PageMeta": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "total",
+          "totalPages"
+        ]
+      },
+      "PatientsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Patient"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "example": {
+          "data": [
+            {
+              "id": "22222222-2222-4222-8222-222222222222",
+              "firstName": "Ana",
+              "lastName": "Ejemplo",
+              "documentNumber": "99000001",
+              "birthDate": "1995-05-20",
+              "phone": "+5493624000000",
+              "email": "ana@example.test",
+              "background": "Antecedentes ficticios",
+              "allergies": null,
+              "medication": null,
+              "createdAt": "2026-10-16T12:00:00Z",
+              "updatedAt": "2026-10-16T12:00:00Z"
+            }
+          ],
+          "meta": {
+            "page": 1,
+            "pageSize": 20,
+            "total": 1,
+            "totalPages": 1
+          }
+        }
+      },
+      "Slot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "startsAt",
+          "endsAt"
+        ],
+        "example": {
+          "startsAt": "2026-10-19T12:00:00Z",
+          "endsAt": "2026-10-19T12:30:00Z"
+        }
+      },
+      "Availability": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "timeZone": {
+            "type": "string",
+            "enum": [
+              "America/Argentina/Buenos_Aires"
+            ]
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "timeZone",
+          "slots"
+        ],
+        "example": {
+          "date": "2026-10-19",
+          "timeZone": "America/Argentina/Buenos_Aires",
+          "slots": [
+            {
+              "startsAt": "2026-10-19T12:00:00Z",
+              "endsAt": "2026-10-19T12:30:00Z"
+            }
+          ]
+        }
+      },
+      "AppointmentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contactName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "contactPhone": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 30
+          },
+          "contactEmail": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "nullable": true
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "contactName",
+          "contactPhone",
+          "startsAt"
+        ],
+        "example": {
+          "contactName": "Ana Ejemplo",
+          "contactPhone": "+5493624000000",
+          "contactEmail": "ana@example.test",
+          "startsAt": "2026-10-19T12:00:00Z"
+        }
+      },
+      "AppointmentStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "confirmed",
+          "attended",
+          "cancelled"
+        ]
+      },
+      "Appointment": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "contactName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "contactPhone": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 30
+          },
+          "contactEmail": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "nullable": true
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AppointmentStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "patientId",
+          "contactName",
+          "contactPhone",
+          "contactEmail",
+          "startsAt",
+          "endsAt",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "example": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "patientId": null,
+          "contactName": "Ana Ejemplo",
+          "contactPhone": "+5493624000000",
+          "contactEmail": "ana@example.test",
+          "startsAt": "2026-10-19T12:00:00Z",
+          "endsAt": "2026-10-19T12:30:00Z",
+          "status": "pending",
+          "createdAt": "2026-10-16T12:00:00Z",
+          "updatedAt": "2026-10-16T12:00:00Z"
+        }
+      },
+      "AppointmentReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AppointmentStatus"
+          }
+        },
+        "required": [
+          "id",
+          "startsAt",
+          "endsAt",
+          "status"
+        ],
+        "example": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "startsAt": "2026-10-19T12:00:00Z",
+          "endsAt": "2026-10-19T12:30:00Z",
+          "status": "pending"
+        }
+      },
+      "AppointmentsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Appointment"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "example": {
+          "data": [
+            {
+              "id": "33333333-3333-4333-8333-333333333333",
+              "patientId": null,
+              "contactName": "Ana Ejemplo",
+              "contactPhone": "+5493624000000",
+              "contactEmail": "ana@example.test",
+              "startsAt": "2026-10-19T12:00:00Z",
+              "endsAt": "2026-10-19T12:30:00Z",
+              "status": "pending",
+              "createdAt": "2026-10-16T12:00:00Z",
+              "updatedAt": "2026-10-16T12:00:00Z"
+            }
+          ],
+          "meta": {
+            "page": 1,
+            "pageSize": 20,
+            "total": 1,
+            "totalPages": 1
+          }
+        }
+      },
+      "AppointmentPatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "attended",
+              "cancelled"
+            ]
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "example": {
+          "status": "confirmed",
+          "patientId": "22222222-2222-4222-8222-222222222222"
+        }
+      },
+      "ConsultationCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "appointmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "observations": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "nullable": true
+          },
+          "weightKg": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 500,
+            "nullable": true,
+            "multipleOf": 0.01
+          },
+          "heightCm": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 250,
+            "nullable": true,
+            "multipleOf": 0.01
+          },
+          "waistCm": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 300,
+            "nullable": true,
+            "multipleOf": 0.01
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "date",
+          "reason",
+          "instructions"
+        ],
+        "example": {
+          "appointmentId": "33333333-3333-4333-8333-333333333333",
+          "date": "2026-10-19",
+          "reason": "Primera consulta ficticia",
+          "objective": "Organizar hábitos",
+          "observations": null,
+          "weightKg": 72.5,
+          "heightCm": 168,
+          "waistCm": null,
+          "instructions": "Indicaciones de ejemplo"
+        }
+      },
+      "Consultation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "appointmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "observations": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "nullable": true
+          },
+          "weightKg": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 500,
+            "nullable": true,
+            "multipleOf": 0.01
+          },
+          "heightCm": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 250,
+            "nullable": true,
+            "multipleOf": 0.01
+          },
+          "waistCm": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 300,
+            "nullable": true,
+            "multipleOf": 0.01
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "patientId",
+          "appointmentId",
+          "date",
+          "reason",
+          "objective",
+          "observations",
+          "weightKg",
+          "heightCm",
+          "waistCm",
+          "instructions",
+          "createdAt",
+          "updatedAt"
+        ],
+        "example": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "patientId": "22222222-2222-4222-8222-222222222222",
+          "appointmentId": "33333333-3333-4333-8333-333333333333",
+          "date": "2026-10-19",
+          "reason": "Primera consulta ficticia",
+          "objective": "Organizar hábitos",
+          "observations": null,
+          "weightKg": 72.5,
+          "heightCm": 168,
+          "waistCm": null,
+          "instructions": "Indicaciones de ejemplo",
+          "createdAt": "2026-10-19T12:20:00Z",
+          "updatedAt": "2026-10-19T12:20:00Z"
+        }
+      },
+      "ConsultationsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Consultation"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "example": {
+          "data": [
+            {
+              "id": "44444444-4444-4444-8444-444444444444",
+              "patientId": "22222222-2222-4222-8222-222222222222",
+              "appointmentId": "33333333-3333-4333-8333-333333333333",
+              "date": "2026-10-19",
+              "reason": "Primera consulta ficticia",
+              "objective": "Organizar hábitos",
+              "observations": null,
+              "weightKg": 72.5,
+              "heightCm": 168,
+              "waistCm": null,
+              "instructions": "Indicaciones de ejemplo",
+              "createdAt": "2026-10-19T12:20:00Z",
+              "updatedAt": "2026-10-19T12:20:00Z"
+            }
+          ],
+          "meta": {
+            "page": 1,
+            "pageSize": 20,
+            "total": 1,
+            "totalPages": 1
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "INVALID_CREDENTIALS",
+                  "UNAUTHENTICATED",
+                  "CSRF_INVALID",
+                  "NOT_FOUND",
+                  "PATIENT_DOCUMENT_EXISTS",
+                  "SLOT_UNAVAILABLE",
+                  "INVALID_STATUS_TRANSITION",
+                  "PATIENT_REQUIRED",
+                  "APPOINTMENT_PATIENT_MISMATCH",
+                  "APPOINTMENT_ALREADY_LINKED",
+                  "RATE_LIMITED",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "field",
+                    "message"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "details"
+            ]
+          },
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "example": {
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Revisá los campos indicados.",
+            "details": [
+              {
+                "field": "firstName",
+                "message": "El nombre es obligatorio."
+              }
+            ]
+          },
+          "requestId": "req-ejemplo-001"
+        }
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Revisá los campos indicados.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Revisá los campos indicados.",
+                "details": []
+              },
+              "requestId": "req-ejemplo-001"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Iniciá sesión para continuar.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "UNAUTHENTICATED",
+                "message": "Iniciá sesión para continuar.",
+                "details": []
+              },
+              "requestId": "req-ejemplo-001"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Renová la protección de la sesión.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "CSRF_INVALID",
+                "message": "Renová la protección de la sesión.",
+                "details": []
+              },
+              "requestId": "req-ejemplo-001"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "No se encontró el recurso.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "NOT_FOUND",
+                "message": "No se encontró el recurso.",
+                "details": []
+              },
+              "requestId": "req-ejemplo-001"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "El horario ya no está disponible.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "SLOT_UNAVAILABLE",
+                "message": "El horario ya no está disponible.",
+                "details": []
+              },
+              "requestId": "req-ejemplo-001"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Demasiadas solicitudes. Intentá más tarde.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "RATE_LIMITED",
+                "message": "Demasiadas solicitudes. Intentá más tarde.",
+                "details": []
+              },
+              "requestId": "req-ejemplo-001"
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "Segundos hasta poder reintentar.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "Error500": {
+        "description": "No se pudo completar la operación.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "No se pudo completar la operación.",
+                "details": []
+              },
+              "requestId": "req-ejemplo-001"
+            }
+          }
+        }
+      }
+    }
+  }
+}

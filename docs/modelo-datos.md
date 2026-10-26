@@ -55,6 +55,7 @@ erDiagram
 - Triggers impiden solapamiento de turnos confirmados/atendidos y bloqueos.
 - Las solicitudes pendientes pueden coincidir: son preferencias por revisar. Solo una puede confirmarse en el mismo horario.
 - Crear solicitud y paciente, y guardar consulta/estado del turno, usan transacciones D1 `batch()`.
+- Al crear una consulta finalizada vinculada, el repositorio agrega el cambio a `atendido` dentro del mismo `batch()`. El navegador no tiene que enviar un segundo comando para garantizarlo. Un borrador no modifica el estado del turno.
 - Las modificaciones se guardan mediante sentencias preparadas con parámetros, sin concatenar entradas del usuario al SQL.
 
 ## Estados
