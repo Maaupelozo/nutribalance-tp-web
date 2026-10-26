@@ -101,6 +101,17 @@
 .request-form .form-grid label { margin: 0; }
 .request-form input,.request-form select,.request-form textarea { width: 100%; min-width: 0; border: 1px solid #b9c5b8; border-radius: var(--radius-control); color: var(--color-ink); background: var(--color-paper); padding: 11px 12px; font-size: 16px; font-weight: 400; margin: 0; }
 .request-form input,.request-form select { min-height: 48px; height: 48px; }
+.request-form .request-slot-field { min-width: 0; }
+.request-form .request-slot-label { display: block; margin-bottom: 9px; font-size: 13px; font-weight: 600; color: var(--color-ink); }
+.request-form .request-slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+.request-form .request-slot-option { display: block; position: relative; margin: 0; cursor: pointer; }
+.request-form .request-slot-option input { position: absolute; width: 1px; min-width: 1px; height: 1px; min-height: 1px; padding: 0; margin: 0; opacity: 0; }
+.request-form .request-slot-option span { display: block; padding: 10px 6px; border: 1px solid #b9c5b8; border-radius: var(--radius-control); background: var(--color-paper); color: var(--color-ink); font-size: 14px; font-weight: 600; text-align: center; transition: background var(--duration-quick), border-color var(--duration-quick), color var(--duration-quick); }
+.request-form .request-slot-option:hover span { border-color: var(--color-forest); background: var(--color-sage); }
+.request-form .request-slot-option.selected span,.request-form .request-slot-option:has(input:checked) span { background: var(--color-forest); border-color: var(--color-forest); color: white; }
+.request-form .request-slot-option:has(input:focus-visible) span { outline: 3px solid var(--color-clay); outline-offset: 3px; }
+.request-form .request-slot-hint { min-height: 48px; margin: 0; padding: 12px; border: 1px dashed var(--color-line); border-radius: var(--radius-control); color: var(--color-muted); font-size: 12px; }
+.request-form .request-slot-field[aria-invalid='true'] .request-slot-grid { padding: 4px; border: 1px solid var(--color-error); border-radius: var(--radius-control); }
 .request-form textarea { min-height: 110px; resize: vertical; }
 .request-form input::placeholder,.request-form textarea::placeholder { color: #647264; opacity: 1; font-size: 14px; }
 .request-form input:hover,.request-form select:hover,.request-form textarea:hover { border-color: var(--color-forest); }
