@@ -22,7 +22,11 @@ export async function forwardExpress(request:Request){
   if(!allowed)return error(404,'NOT_FOUND','No se encontró el recurso.');
   if(!allowed[1].includes(request.method))return error(405,'METHOD_NOT_ALLOWED','Esta acción no está disponible.');
   if(request.method!=='GET'&&request.headers.get('Origin')!==url.origin)return error(403,'ORIGIN_INVALID','Volvé a abrir el formulario desde NutriBalance.');
-  const headers=new Headers({Accept:'application/json',Origin:url.origin});
+  // Browser origin is checked above; Express separately allowlists this server hop.
+  const upstreamOrigin=process.env.EXPRESS_ALLOWED_ORIGIN
+    ? new URL(process.env.EXPRESS_ALLOWED_ORIGIN).origin
+    : url.origin;
+  const headers=new Headers({Accept:'application/json',Origin:upstreamOrigin});
   const cookie=request.headers.get('Cookie')?.split(';').map(value=>value.trim()).find(value=>value.startsWith('nutri.sid='));
   if(cookie)headers.set('Cookie',cookie);
   const csrf=request.headers.get('X-CSRF-Token');

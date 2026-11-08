@@ -21,7 +21,7 @@ Los turnos duran 30 minutos, de lunes a viernes entre 09:00 y 17:00, con un hori
 ## Arquitectura
 
 - React, TypeScript y CSS propio: interfaz editorial en verde bosque y marfil; fuentes locales Manrope y Source Serif 4.
-- Vinext/Vite y Cloudflare Worker: páginas públicas y gateway HTTP.
+- Vinext/Vite y Cloudflare Worker o servidor Node en Docker: páginas públicas y gateway HTTP.
 - Express en `https://api.neadev.com/api/v1`: sesiones, pacientes, disponibilidad, turnos y consultas. El contrato del equipo especifica PostgreSQL; este repositorio no contiene el servidor ni sus migraciones.
 - Gateway fijo `/api/v1/*`: reenvía únicamente las rutas del contrato y la cookie `nutri.sid`. Mantiene la sesión en el mismo origen del sitio para evitar depender de cookies de terceros. No acepta destinos arbitrarios ni reenvía la identidad de la plataforma.
 - Sesión administrada por Express, cookie HttpOnly/Secure y token CSRF en memoria. No se guardan contraseñas, sesiones ni historias clínicas en `localStorage`.
@@ -54,6 +54,12 @@ pnpm dev
 Abrí `http://localhost:5173`. Ese origen debe estar permitido por el backend. No se necesita copiar la contraseña a una variable de entorno: se introduce en el formulario de acceso.
 
 Para el respaldo D1, `.env.example` documenta `PROFESSIONAL_EMAILS`. Ese valor solo se configura en el servidor; no interviene en el login Express. Las migraciones están en `drizzle/`.
+
+## Docker y Render
+
+El [Dockerfile](Dockerfile) compila la salida independiente de Vinext y ejecuta el servidor Node en el puerto `PORT` asignado por Render. El [Blueprint](render.yaml) configura un servicio web gratuito y comprueba `/api/health`. Consultá [la guía de despliegue](docs/despliegue-render.md).
+
+El contenedor aloja esta web y el gateway `/api/v1/*`; la API Express y PostgreSQL siguen alojados en `api.neadev.com`. El backend debe mantener autorizado el origen configurado en `EXPRESS_ALLOWED_ORIGIN`.
 
 ## Verificar
 

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nutribalance-mauricio
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: EXPRESS_ALLOWED_ORIGIN
+        value: https://nutribalance-mauricio.maauri.chatgpt.site

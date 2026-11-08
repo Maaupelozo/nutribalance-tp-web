@@ -84,6 +84,27 @@ test('the gateway forwards only backend session and CSRF, scopes cookies and nev
   assert.equal(response.headers.get('Cache-Control'),'no-store');
 });
 
+test('the Render gateway checks the browser origin before sending the backend allowlisted origin',async t=>{
+  const previous=process.env.EXPRESS_ALLOWED_ORIGIN;
+  process.env.EXPRESS_ALLOWED_ORIGIN='https://nutribalance-mauricio.maauri.chatgpt.site';
+  t.after(()=>{
+    if(previous===undefined)delete process.env.EXPRESS_ALLOWED_ORIGIN;
+    else process.env.EXPRESS_ALLOWED_ORIGIN=previous;
+  });
+  const {forwardExpress}=await moduleAt('../lib/server/express-gateway.ts');let upstreamOrigin;
+  t.mock.method(globalThis,'fetch',async(_url,options)=>{
+    upstreamOrigin=options.headers.get('Origin');
+    return Response.json({csrfToken:'test-token'});
+  });
+  const base='https://nutribalance-mauricio.onrender.com/api/v1/auth/login';
+  const rejected=await forwardExpress(new Request(base,{method:'POST',headers:{Origin:'https://other.test','Content-Type':'application/json'},body:'{}'}));
+  assert.equal(rejected.status,403);
+  assert.equal(upstreamOrigin,undefined);
+  const accepted=await forwardExpress(new Request(base,{method:'POST',headers:{Origin:'https://nutribalance-mauricio.onrender.com','Content-Type':'application/json'},body:'{}'}));
+  assert.equal(accepted.status,200);
+  assert.equal(upstreamOrigin,'https://nutribalance-mauricio.maauri.chatgpt.site');
+});
+
 test('the gateway preserves 204 logout and turns unavailable upstream responses into recoverable errors',async t=>{
   const {forwardExpress}=await moduleAt('../lib/server/express-gateway.ts');
   t.mock.method(globalThis,'fetch',async()=>new Response(null,{status:204,headers:{'Set-Cookie':'nutri.sid=; Path=/; Max-Age=0; HttpOnly; Secure'}}));
