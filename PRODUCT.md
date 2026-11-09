@@ -2,7 +2,7 @@
 
 ## Platform
 
-Web. React + TypeScript, Vinext/Vite, Cloudflare Worker y D1/SQLite. Sitio público con panel profesional autorizado en servidor.
+Web. React + TypeScript, Vinext/Vite y Cloudflare Worker. La interfaz principal usa una API Express externa; el contrato del equipo especifica PostgreSQL. D1/SQLite conserva una implementación anterior. Sitio público con panel profesional autorizado por Express.
 
 ## Users
 
@@ -15,10 +15,10 @@ Centralizar solicitudes, agenda, pacientes e historial para el escenario NutriTu
 ## Capabilities and Constraints
 
 - Solicitud pública pendiente con comprobante e idempotencia; no es una reserva de disponibilidad garantizada.
-- Pacientes, turnos, consultas y bloqueos persisten en D1.
-- Panel con identidad ChatGPT y permiso profesional comprobado por servidor.
+- Pacientes, turnos y consultas del flujo principal se gestionan mediante Express. Las funciones D1 permanecen como respaldo independiente.
+- Panel con sesión profesional y protección CSRF administradas por Express.
 - Solo datos ficticios. Sin testimonios, matrícula, especialidades ni credenciales inventadas.
-- Express es un contrato futuro, no el backend conectado.
+- La API Express está conectada; su servidor y esquema físico no forman parte de este repositorio.
 - Portal paciente, documentos, diario y pagos son complementos visuales.
 - No hay fotografía autorizada del profesional. La portada utiliza composición tipográfica.
 

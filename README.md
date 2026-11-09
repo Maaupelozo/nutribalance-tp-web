@@ -90,3 +90,9 @@ No incluyas credenciales en argumentos, archivos, Git ni capturas.
 | `docs/api-externa/` | Contrato original recibido, sin credenciales |
 
 Consultá [la integración](docs/integracion-api.md), [la verificación](docs/verificacion.md) y [el estado de entrega](docs/estado-entrega.md) para conocer la evidencia y los pendientes.
+
+## Entregables escritos
+
+- [1. Análisis funcional](docs/entrega/01-analisis-funcional.md)
+- [7. Evidencias de SEO y calidad](docs/entrega/07-evidencias-seo-calidad.md)
+- [8. Documento final](docs/entrega/08-documento-final.md)

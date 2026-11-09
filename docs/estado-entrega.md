@@ -2,6 +2,8 @@
 
 Revisión del 26 de octubre de 2026. Este documento distingue el flujo disponible de la evidencia y los pendientes del equipo.
 
+**Actualización del 8 de noviembre de 2026:** el [repositorio GitHub](https://github.com/Maaupelozo/nutribalance-tp-web) ya contiene el código y la configuración Docker/Render. La auditoría móvil de Lighthouse y los tres documentos escritos están en [docs/entrega](entrega/README.md). La tabla siguiente conserva el estado de la revisión del 26 de octubre.
+
 ## Flujo disponible
 
 La interfaz principal utiliza la API Express: disponibilidad, solicitud pública, login por correo/contraseña, pacientes, confirmación vinculada a una ficha, consulta e historial. El sitio mantiene su audiencia pública y Express protege cada operación privada.

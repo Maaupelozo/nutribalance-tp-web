@@ -1,5 +1,7 @@
 # Verificación y pendientes de entrega
 
+**Evidencia posterior:** la [auditoría Lighthouse del 8 de noviembre de 2026](entrega/07-evidencias-seo-calidad.md) aporta puntuaciones y reporte de la URL pública. Las secciones fechadas más abajo conservan el estado de sus respectivas revisiones.
+
 ## Integración Express — 26 de octubre de 2026
 
 TypeScript, compilación y pruebas unitarias del cliente/gateway: aprobadas. La ejecución del Worker compilado contra la API real verificó login, 401 anónimo, CSRF inválido 403, validación 400, alta/edición/recarga de paciente, solicitud 201, conflicto de slot 409, confirmación vinculada, consulta independiente e historial, cancelación/liberación de horario y logout 204 con posterior 401.
